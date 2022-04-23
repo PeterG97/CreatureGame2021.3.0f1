@@ -1,0 +1,156 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4467217679526487081
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4467217679526487082}
+  - component: {fileID: 4467217679526487083}
+  m_Layer: 0
+  m_Name: LifeformManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!4 &4467217679526487082
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4467217679526487081}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4467217679526487083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4467217679526487081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e88f4d79b6c29c45a503e32e4ae23b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  plantMaxAge: 180
+  animalMaxAge: 600
+  ageVariation: 0.1
+  animalAdultAgePercent: 0.25
+  newSpawnChildChance: 0.25
+  animalChildStatMult: 0.5
+  plantMinSpawnSize: 0.75
+  plantMaxSpawnSize: 1.25
+  animalMinSpawnSize: 0.75
+  animalMaxSpawnSize: 1.25
+  plantBaseHP: 5
+  animalsBaseHP: 10
+  hpPower: 2
+  animalsBaseMoveSpeed: 50
+  moveSpeedPower: -1
+  plantBaseMaxNutrition: 3000
+  plantBaseGrowRate: 1
+  plantStartingNutritionMin: 0.1
+  plantStartingNutritionMax: 0.6
+  babyPlantStartingNutrition: 0.01
+  animalsBaseMaxNutrition: 5000
+  animalsBaseHungerRate: 1
+  animalStartingNutritionMin: 0.6
+  animalStartingNutritionMax: 1
+  nutritionPower: 2
+  nutritionChangeRatePower: 2
+  carnivoreChance: 0.05
+  omnivoreChance: 0.15
+  violentChance: 0.05
+  fearfulChance: 0.3
+  animalsMinSight: 0.5
+  animalsMaxSight: 1.5
+  animalsBaseSightRadius: 5
+  animalsAttackMin: 1
+  animalsAttackMax: 4
+  animalsHPRegenMax: 0.02
+  reproductionGeneticVariation: 0.1
+  reproductionAgePercentMin: 0.05
+  reproductionAgePercentMax: 0.2
+  plantReproductionDeathAgeLost: 0.1
+  chanceAsexual: 0.1
+  reproductionBehaviorVariation: 0.1
+  reproductionDietVariation: 0.03
+  reproductionTypeVariation: 0.02
+  sexualNutritionLost: 0.2
+  asexualNutritionLost: 0.6
+  sexualDeathAgeLost: 0.2
+  asexualDeathAgeLost: 0.4
+  plantPrefab: {fileID: 6750119533661421117, guid: 5ec27e5bc1a4303469f0c6592e1832e5, type: 3}
+  animalPrefab: {fileID: 3914479508139568760, guid: a107c358e13438041aa27df4e09cfb6b, type: 3}
+  plantSprites:
+  - {fileID: 3286163911610860551, guid: a716c37ad72136e419e4a8c9d5562eb7, type: 3}
+  - {fileID: 3286163911610860551, guid: d2e62b5583bcf6d44bc776240312648c, type: 3}
+  - {fileID: 3286163911610860551, guid: d3cbf537d91e39543809b7c1d210fc48, type: 3}
+  - {fileID: 3286163911610860551, guid: 897205321f4d41141b24401eb174976b, type: 3}
+  - {fileID: 3286163911610860551, guid: 15fc1c840f54f15449834d24dd3b2b2d, type: 3}
+  bodySprites:
+  - {fileID: 3286163911610860551, guid: 5d7d18ba90f06614182f137e9b4514cf, type: 3}
+  - {fileID: 3286163911610860551, guid: 7b5dc121e52ba1546a81a9d6e2beff92, type: 3}
+  - {fileID: 3286163911610860551, guid: fdf87082b278816438db178f5440aed1, type: 3}
+  - {fileID: 3286163911610860551, guid: eaf6e82013e950b4ba87719298f327bc, type: 3}
+  eyeSprites:
+  - {fileID: -1514871701, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 97562463, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -1581121283, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 812535452, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -14691688, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 814159956, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -1685333539, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 910046441, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -812771093, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -1481629497, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -1771742935, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 1566717834, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -374687923, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 589893998, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -1216759715, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -1874372481, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 486883416, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 1506881156, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 804586797, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 198150181, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -558458540, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: -263390171, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  - {fileID: 1035501192, guid: e7846591475cd544eaf824648c85caa0, type: 3}
+  mouthSprites:
+  - {fileID: -1319041054, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 587958, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1273528484, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1891225748, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1292571646, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 1763800179, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -846285290, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1990476570, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -828673104, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1237254463, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -738060189, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 1972868376, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 1371061163, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 227762462, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 1563017588, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1126344172, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1106505, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 274501098, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1586400045, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 929432567, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: -1674116814, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 426309749, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  - {fileID: 2086973587, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
+  minColorValue: 0.7
