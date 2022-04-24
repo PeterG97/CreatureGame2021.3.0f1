@@ -9,14 +9,11 @@ using UnityEngine.SceneManagement;
  * Adjust depth sorting for outline (either add basic offset to help a little or track line width in script)
  * Add movement behaviors
  * Add social behavior (follower, protective, antisocial)
- * Hover Animal Menu
  * Tile map grass, sand, water
- * Get PermanentMonSingletons to load from prefab
  * Plant wind shader stutter
  * Research best practice universal input system
  * UI Overhaul (Maybe new ui system)
- * Implement better age & reproduction timer spawing (some animals spawn near death)
- */
+ * Implement better age & reproduction timer spawing (some animals spawn near death) */
 #endregion
 
 public class GameManager : PermanentMonoSingleton<GameManager>
@@ -26,8 +23,6 @@ public class GameManager : PermanentMonoSingleton<GameManager>
     #region ---=== Serialized Variables ===---
     //Reference to scriptable object which will be copied for runtime instance
     [SerializeField] private GameValues gameValuesBase;
-
-    [SerializeField] public float gameCellSize = 1; //TODO Remove
     #endregion
 
     #region ---=== Nonserialized Variables ===---

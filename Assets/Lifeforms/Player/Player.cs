@@ -59,7 +59,7 @@ public class Player : MonoBehaviour
 
     private void ShootPerformed()
     {
-        if (shootTimer <= 0 && !UIManager.Instance.PointerOverUIObject())
+        if (shootTimer <= 0 && !UIManager.Instance.PointerOverUI())
         {
             shootTimer = shootTimerMax;
 

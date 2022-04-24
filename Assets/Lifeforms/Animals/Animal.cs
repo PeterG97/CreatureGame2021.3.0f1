@@ -7,7 +7,7 @@ public class Animal : SimulatedLifeform
 {
     /* Dependent on Classes:
      * PermanentMonoSingleton - GameManager
-     * PermanentMonoSingleton - LifeformManager */
+     * MonoSingleton - LifeformManager */
 
     #region ---=== Serialized Variables ===---
     [Header("Animal Attributes")]
@@ -78,6 +78,18 @@ public class Animal : SimulatedLifeform
     #endregion
 
     #region ---=== Get/Set Variables ===---
+    [NonSerialized] private LifeformValues lifeformValues;
+    public LifeformValues LifeformValues
+    {
+        get
+        {
+            if (lifeformValues == null)
+                lifeformValues = LifeformManager.Instance.LifeformValues;
+
+            return lifeformValues;
+        }
+        private set { } //Never direcly set
+    }
     public float DecomposeTimer
     {
         get
@@ -163,7 +175,7 @@ public class Animal : SimulatedLifeform
 
     void Start()
     {
-        interactDistance = GameManager.Instance.gameCellSize;
+        interactDistance = GameManager.Instance.GameValues.GameCellSize;
         bodyMaterial = transform.Find("Sprites").Find("BodySprite").GetComponent<Renderer>().material;
     }
 
@@ -763,7 +775,7 @@ public class Animal : SimulatedLifeform
         age = adultAge;//Age will create a loop
         adult = true;
         GameManager.Instance.PlayAnimalGrowUpParticle(transform.position, transform.localScale.x);
-        LifeformManager.Instance.AnimalMultiplyAgeStats(this, 1 / LifeformManager.Instance.animalChildStatMult);
+        LifeformManager.Instance.AnimalMultiplyAgeStats(this, 1 / LifeformValues.animalChildStatMult);
     }
 
     public void ResizeChild()

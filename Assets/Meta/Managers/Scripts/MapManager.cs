@@ -5,22 +5,37 @@ using UnityEngine;
 
 public class MapManager : MonoSingleton<MapManager>
 {
-    #region ---=== Auto Assigned/Constant Variables ===---
     /* Dependent on Classes:
      * PermanentMonoSingleton - GameManager
-     * PermanentMonoSingleton - LifeformManager */
+     * MonoSingleton - LifeformManager */
 
-    //Important Structures
-    [NonSerialized] private GameObject background;
-    [NonSerialized] private GameObject northWall, eastWall, southWall, westWall;
-    #endregion
-
-    #region ---=== Inspector Variables ===---
+    #region ---=== Serialized Variables ===---
     [Header("Editor Tools")]
     [SerializeField] public bool respawnAll = false;
     [Header("Grid")]
     [SerializeField] public int cellWidth = 16, cellHeight = 9;
     [SerializeField] public float wallDistance = 5;
+    #endregion
+
+    #region ---=== Nonserialized Variables ===---
+    //References
+    [NonSerialized] private GameValues gameValues;
+    //Important Structures
+    [NonSerialized] private GameObject background;
+    [NonSerialized] private GameObject northWall, eastWall, southWall, westWall;
+
+    //Constants
+    [NonSerialized] private float gameCellSize;
+    #endregion
+
+    #region ---=== Get/Set Variables ===---
+
+
+
+    #endregion
+
+    #region ---=== Inspector Variables ===---
+
     #endregion
 
     #region ---=== Data Variables ===---
@@ -43,6 +58,12 @@ public class MapManager : MonoSingleton<MapManager>
         generalGrid = new Grid(cellWidth, cellHeight);
 
         respawnAll = true; //On first update SetupSpawn will happen
+    }
+
+    private void Start()
+    {
+        gameValues = GameManager.Instance.GameValues;
+        gameCellSize = gameValues.GameCellSize;
     }
 
     private void Update()
@@ -70,8 +91,8 @@ public class MapManager : MonoSingleton<MapManager>
 
     public void UpdateGeneralGridSize()
     {
-        mapWidth = cellWidth * GameManager.Instance.gameCellSize;
-        mapHeight = cellHeight * GameManager.Instance.gameCellSize;
+        mapWidth = cellWidth * gameCellSize;
+        mapHeight = cellHeight * gameCellSize;
 
         if (CameraManager.Instance != null)
             CameraManager.Instance.UpdateCameraSize(mapWidth, mapHeight);
@@ -79,36 +100,36 @@ public class MapManager : MonoSingleton<MapManager>
         UIManager.Instance.UpdateGridUI();
 
         if (CheckNull.SingleObjectNotNull(ref background, "MapBackground", true))
-            background.transform.localScale = new Vector2 (cellWidth * GameManager.Instance.gameCellSize, cellHeight * GameManager.Instance.gameCellSize);
+            background.transform.localScale = new Vector2 (cellWidth * gameCellSize, cellHeight * gameCellSize);
 
         generalGrid = new Grid(cellWidth, cellHeight, generalGrid);
 
         if (CheckNull.SingleObjectNotNull(ref northWall, "NorthWall", true))
         {
-            northWall.transform.position = new Vector3((cellWidth * GameManager.Instance.gameCellSize) / 2,
-                                            cellHeight * GameManager.Instance.gameCellSize + wallDistance / 2,
+            northWall.transform.position = new Vector3((cellWidth * gameCellSize) / 2,
+                                            cellHeight * gameCellSize + wallDistance / 2,
                                             northWall.transform.position.z);
-            northWall.transform.localScale = new Vector3(cellWidth * GameManager.Instance.gameCellSize,
+            northWall.transform.localScale = new Vector3(cellWidth * gameCellSize,
                                                         wallDistance,
                                                         northWall.transform.localScale.z);
         }
 
         if (CheckNull.SingleObjectNotNull(ref eastWall, "EastWall", true))
         {
-            eastWall.transform.position = new Vector3(cellWidth * GameManager.Instance.gameCellSize + wallDistance / 2,
-                                                    (cellHeight * GameManager.Instance.gameCellSize) / 2,
+            eastWall.transform.position = new Vector3(cellWidth * gameCellSize + wallDistance / 2,
+                                                    (cellHeight * gameCellSize) / 2,
                                                     eastWall.transform.position.z);
             eastWall.transform.localScale = new Vector3(wallDistance,
-                                                        cellHeight * GameManager.Instance.gameCellSize,
+                                                        cellHeight * gameCellSize,
                                                         eastWall.transform.localScale.z);
         }
 
         if (CheckNull.SingleObjectNotNull(ref southWall, "SouthWall", true))
         {
-            southWall.transform.position = new Vector3((cellWidth * GameManager.Instance.gameCellSize) / 2,
+            southWall.transform.position = new Vector3((cellWidth * gameCellSize) / 2,
                                                         -wallDistance / 2,
                                                         southWall.transform.position.z);
-            southWall.transform.localScale = new Vector3(cellWidth * GameManager.Instance.gameCellSize,
+            southWall.transform.localScale = new Vector3(cellWidth * gameCellSize,
                                                         wallDistance,
                                                         southWall.transform.localScale.z);
         }
@@ -116,10 +137,10 @@ public class MapManager : MonoSingleton<MapManager>
         if (CheckNull.SingleObjectNotNull(ref westWall, "WestWall", true))
         {
             westWall.transform.position = new Vector3(-wallDistance / 2,
-                                                        (cellHeight * GameManager.Instance.gameCellSize) / 2,
+                                                        (cellHeight * gameCellSize) / 2,
                                                         westWall.transform.position.z);
             westWall.transform.localScale = new Vector3(wallDistance,
-                                                        cellHeight * GameManager.Instance.gameCellSize,
+                                                        cellHeight * gameCellSize,
                                                         westWall.transform.localScale.z);
         }
     }
@@ -250,8 +271,8 @@ public class MapManager : MonoSingleton<MapManager>
 
         if (generalGrid.GetValue(_cell) == 0)
         {
-            Plant newPlant = LifeformManager.Instance.SpawnNewPlant(new Vector2(_cell[0] + GameManager.Instance.gameCellSize / 2,
-                                                                              _cell[1] + GameManager.Instance.gameCellSize / 2));
+            Plant newPlant = LifeformManager.Instance.SpawnNewPlant(new Vector2(_cell[0] + gameCellSize / 2,
+                                                                              _cell[1] + gameCellSize / 2));
             
             newPlant.gridLocation = _cell;
 
@@ -270,8 +291,8 @@ public class MapManager : MonoSingleton<MapManager>
 
         if (generalGrid.GetValue(_cell) == 0)
         {
-            Animal newAnimal = LifeformManager.Instance.SpawnNewAnimal(new Vector2(_cell[0] + GameManager.Instance.gameCellSize / 2,
-                                                                    _cell[1]+ GameManager.Instance.gameCellSize / 2));
+            Animal newAnimal = LifeformManager.Instance.SpawnNewAnimal(new Vector2(_cell[0] + gameCellSize / 2,
+                                                                    _cell[1]+ gameCellSize / 2));
 
             return newAnimal;
         }

@@ -11,5 +11,5 @@ public class GameValues : ScriptableObject
 
     //Changeable at runtime
     [SerializeField] private int targetFPS;
-    public int TargetFPS { get => targetFPS; set => targetFPS = value; }
+    public int TargetFPS { get => targetFPS; private set => targetFPS = value; }
 }

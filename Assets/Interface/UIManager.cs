@@ -11,8 +11,16 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoSingleton<UIManager>
 {
+    /* Dependent on Classes:
+     * PermanentMonoSingleton - GameManager
+     * MonoSingleton - LifeformManager (If the UICanvas events are activated)
+     * MonoSingleton - MapManager (If the UICanvas events are activated) */
+
     #region ---=== Nonserialized Variables ===---
-    //Main refernces
+    //State variables
+    [NonSerialized] private bool isOverUI;
+
+    //Main references
     [NonSerialized] public Canvas UICanvas;
     [NonSerialized] private InterfaceInputActions interfaceInput;
     [NonSerialized] private RectTransform optionsMenuTransform;
@@ -72,6 +80,7 @@ public class UIManager : MonoSingleton<UIManager>
     private void FixedUpdate()
     {
         MouseOver();
+        CheckPointerOverUI();
     }
 
     private void OnEnable()
@@ -129,6 +138,11 @@ public class UIManager : MonoSingleton<UIManager>
                 Animal animal = mouseRay[i].gameObject.GetComponent<Animal>();
                 if (animal != null)
                 {
+                    //With just isOverUI it was possible to disable the animalInfo window when over UI but the animalInfo itself is UI
+                    //so if near the end of the screen it would flash on and off
+                    if (!animalInfoMenuTransform.gameObject.activeSelf && isOverUI) //If not yet enabled and currently over UI do not enable
+                        break;
+
                     DisplayAnimalInfo(animal, mousePosition);
                     break;
                 }
@@ -199,17 +213,24 @@ public class UIManager : MonoSingleton<UIManager>
     public void UndisplayAnimalInfo()
     {
         if (animalInfoMenuTransform != null)
+        {
             animalInfoMenuTransform.gameObject.SetActive(false);
+        }  
     }
 
-    public bool PointerOverUIObject()
+    public bool PointerOverUI()
+    {
+        return isOverUI;
+    }
+
+    private void CheckPointerOverUI()
     {
         Vector2 mousePosition = interfaceInput.UI.Point.ReadValue<Vector2>();
         PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
         eventDataCurrentPosition.position = new Vector2(mousePosition.x, mousePosition.y);
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
-        return results.Count > 0;
+        isOverUI = results.Count > 0;
     }
     #endregion
 

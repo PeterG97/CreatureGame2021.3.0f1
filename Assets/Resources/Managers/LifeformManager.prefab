@@ -44,54 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e88f4d79b6c29c45a503e32e4ae23b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  plantMaxAge: 180
-  animalMaxAge: 600
-  ageVariation: 0.1
-  animalAdultAgePercent: 0.25
-  newSpawnChildChance: 0.25
-  animalChildStatMult: 0.5
-  plantMinSpawnSize: 0.75
-  plantMaxSpawnSize: 1.25
-  animalMinSpawnSize: 0.75
-  animalMaxSpawnSize: 1.25
-  plantBaseHP: 5
-  animalsBaseHP: 10
-  hpPower: 2
-  animalsBaseMoveSpeed: 50
-  moveSpeedPower: -1
-  plantBaseMaxNutrition: 3000
-  plantBaseGrowRate: 1
-  plantStartingNutritionMin: 0.1
-  plantStartingNutritionMax: 0.6
-  babyPlantStartingNutrition: 0.01
-  animalsBaseMaxNutrition: 5000
-  animalsBaseHungerRate: 1
-  animalStartingNutritionMin: 0.6
-  animalStartingNutritionMax: 1
-  nutritionPower: 2
-  nutritionChangeRatePower: 2
-  carnivoreChance: 0.05
-  omnivoreChance: 0.15
-  violentChance: 0.05
-  fearfulChance: 0.3
-  animalsMinSight: 0.5
-  animalsMaxSight: 1.5
-  animalsBaseSightRadius: 5
-  animalsAttackMin: 1
-  animalsAttackMax: 4
-  animalsHPRegenMax: 0.02
-  reproductionGeneticVariation: 0.1
-  reproductionAgePercentMin: 0.05
-  reproductionAgePercentMax: 0.2
-  plantReproductionDeathAgeLost: 0.1
-  chanceAsexual: 0.1
-  reproductionBehaviorVariation: 0.1
-  reproductionDietVariation: 0.03
-  reproductionTypeVariation: 0.02
-  sexualNutritionLost: 0.2
-  asexualNutritionLost: 0.6
-  sexualDeathAgeLost: 0.2
-  asexualDeathAgeLost: 0.4
+  lifeformValuesBase: {fileID: 11400000, guid: 9947909cbc4d9694d9b95aa06b88d134, type: 2}
   plantPrefab: {fileID: 6750119533661421117, guid: 5ec27e5bc1a4303469f0c6592e1832e5, type: 3}
   animalPrefab: {fileID: 3914479508139568760, guid: a107c358e13438041aa27df4e09cfb6b, type: 3}
   plantSprites:
