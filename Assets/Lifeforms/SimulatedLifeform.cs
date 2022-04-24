@@ -5,13 +5,37 @@ using System;
 
 public class SimulatedLifeform : Lifeform
 {
+    #region ---=== Serialized Variables ===---
     [Header("Info")]
-    [SerializeField] public float generations = 0f;
+    [SerializeField] public int generations;
     [Header("Basic Stats")]
-    [SerializeField] public float size = 1;
-    [SerializeField] public Color color = Color.white;
-    [SerializeField] public float maxNutrition = 10000f;
-    [SerializeField] protected float nutrition = 10000f;
+    [SerializeField] public float size;
+    [SerializeField] public Color color;
+    [SerializeField] protected float age;
+    [SerializeField] public float maxAge;
+    [SerializeField] public float deathAge;
+    [SerializeField] public float maxNutrition;
+    [SerializeField] protected float nutrition;
+    #endregion
+
+    #region ---=== Nonserialized Variables ===---
+
+    #endregion
+
+    #region ---=== Get/Set Variables ===---
+    public virtual float Age
+    {
+        get { return age; }
+        set
+        {
+            age = value;
+
+            if (age >= deathAge)
+            {
+                Die();
+            }
+        }
+    }
     public virtual float Nutrition
     {
         get { return nutrition; }
@@ -29,23 +53,7 @@ public class SimulatedLifeform : Lifeform
             }
         }
     }
-    [Tooltip("Second until a old age death (Default 600)")]
-    [SerializeField] public float maxAge = 5f;
-    [SerializeField] public float deathAge = 5f;
-    [SerializeField] protected float age = 0;
-    public virtual float Age
-    {
-        get { return age; }
-        set
-        {
-            age = value;
-
-            if (age >= deathAge)
-            {
-                Die();
-            }
-        }
-    }
+    #endregion
 
     protected virtual void FixedUpdate()
     {

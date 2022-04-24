@@ -9,13 +9,8 @@ public class Animal : SimulatedLifeform
      * PermanentMonoSingleton - GameManager
      * PermanentMonoSingleton - LifeformManager */
 
-    #region ---=== Auto Assigned/Constant Variables ===---
-    [NonSerialized] public Rigidbody2D rigidBody;
-    [NonSerialized] public Collider2D sightCollider;
-    [NonSerialized] public ParticleSystem.MainModule slimeParticles;
-    #endregion
-
-    #region ---=== Data Variables ===---
+    #region ---=== Serialized Variables ===---
+    [Header("Animal Attributes")]
     [Header("Body")]
     [SerializeField] public int bodyIndex = 0;
     [SerializeField] public int eyeIndex = 0;
@@ -38,12 +33,51 @@ public class Animal : SimulatedLifeform
     [SerializeField] public float sight = 1f;
     [SerializeField] public float attackPower = 1f;
     [SerializeField] public float hitPointsRegenSpeed = 0f;
+    [SerializeField] public float reproductionWaitTime = 10f; //TODO not fully impemented as an ability
     [Header("Reproduction")]
     [SerializeField] public bool sexualReproduction = true;
     [SerializeField] public List<Animal> parents = new List<Animal>();
-    [Header("Death")]
-    [NonSerialized] public bool dead = false;
-    [SerializeField] private float decomposeTimer = 100f;
+
+    [Header("Control Variables")]
+    [SerializeField] public bool dead = false;
+    [SerializeField] private AnimalAction action;
+    [SerializeField] public LifeformObject target; //Context depends on state
+    [SerializeField] public Vector2 wanderPos; //Only used for idle wander
+    [SerializeField] private List<GameObject> detectionList = new List<GameObject>(); //All objects seen since start of detection cooldown
+
+    [Header("Timers")] //All count down to 0 or less which permits some action
+    [SerializeField] private float wanderTimer; //How long an idle animal will walk in one direction
+    [SerializeField] private float detectionTimer ; //Time in between checking for new attackTarget
+    [SerializeField] private float timeOutTimer = 10f; //Stops action if its taking more than this time
+    [SerializeField] private float actionTimer; //Time until able to perform direct interactions such as attacking or eating
+    [SerializeField] private float resizeTimer; //Time until updating child and corpse scale (every update disables physics so infrequent is better)
+    [SerializeField] private float reproductionTimer; //Time until able to breed
+    [SerializeField] private float stunTimer; //Time until able to move again
+    [SerializeField] private float stunEffectTimer; //Time until a new particle is spawned
+    [SerializeField] private float decomposeTimer = 1f; //Time until an animal corpse disappears
+    #endregion
+
+    #region ---=== Nonserialized Variables ===---
+    //Own Components
+    [NonSerialized] public Rigidbody2D rigidBody;
+    [NonSerialized] public Collider2D sightCollider;
+    [NonSerialized] public ParticleSystem.MainModule slimeParticles;
+    [NonSerialized] private Material bodyMaterial;
+
+    //Constant values
+    [NonSerialized] private float interactDistance;
+
+    //Time values to reset timers to
+    [Header("Timers")]
+    [NonSerialized] private float wanderTimerMax = 3f;
+    [NonSerialized] private float detectionTimerMax = 2f;
+    [NonSerialized] private float timeOutTimerMax = 10f;
+    [NonSerialized] private float actionTimerMax = 1f;
+    [NonSerialized] private float resizeTimerMax = 3f;
+    [NonSerialized] private float stunEffectTimerMax = 1f;
+    #endregion
+
+    #region ---=== Get/Set Variables ===---
     public float DecomposeTimer
     {
         get
@@ -60,37 +94,6 @@ public class Animal : SimulatedLifeform
             }
         }
     }
-    #endregion
-
-    #region ---=== Control Variables ===---
-    [Header("Control Variables")]
-    [SerializeField] private AnimalAction action;
-    
-    [SerializeField] public LifeformObject target; //Context depends on state
-    [SerializeField] public Vector2 wanderPos; //Only used for idle wander
-    [SerializeField] private List<GameObject> detectionList = new List<GameObject>(); //All objects seen since start of detection cooldown
-
-    //Constants set at startup
-    [NonSerialized] private float interactDistance;
-
-    [Header("Timers")]
-    [NonSerialized] private float wanderTimerMax = 3f; //How long an idle animal will walk in one direction
-    [SerializeField] private float wanderTimer = 0.1f;
-    [NonSerialized] private float detectionTimerMax = 2f; //Time in between checking for new attackTarget
-    [SerializeField] private float detectionTimer = 0.1f;
-    [NonSerialized] private float timeOutTimerMax = 10f; //Stops action if its taking more than this time
-    [SerializeField] private float timeOutTimer = 10f;
-    [NonSerialized] private float actionTimerMax = 1f; //Time in between direct interactions such as attacking or eating
-    [SerializeField] private float actionTimer = 0.1f;
-    [NonSerialized] private float resizeTimerMax = 3f; //Time in between updating child and corpse scale (every update disables physics so infrequent is better)
-    [SerializeField] private float resizeTimer = 0;
-    [NonSerialized] public float reproductionTimerMax = 10f; //Time in between breeding
-    [SerializeField] public float reproductionTimer = 1f;
-    [SerializeField] private float stunTimer;
-    [SerializeField] private float stunEffectTimerMax = 1f;
-    [SerializeField] private float stunEffectTimer = 0f;
-    [NonSerialized] private Material bodyMaterial;
-    //Dynamic Variables
     public override float Age
     {
         get { return age; }
@@ -146,6 +149,7 @@ public class Animal : SimulatedLifeform
         }
     }
     #endregion
+
 
     private void Awake()
     {
@@ -786,7 +790,7 @@ public class Animal : SimulatedLifeform
         transform.position = new Vector3(transform.position.x, transform.position.y, -(transform.localScale.y - 1) / 2);
     }
 
-    public void ResetAfterBreed(float _nutritionLost, float _deathAgeLost)
+    public void AfterBreed(float _nutritionLost, float _deathAgeLost)
     {
         //Stats lost
         Nutrition -= maxNutrition * _nutritionLost;
@@ -795,7 +799,7 @@ public class Animal : SimulatedLifeform
         //Timer Resets
         actionTimer = actionTimerMax;
         detectionTimer = detectionTimerMax; //Prevents immediatly doing something else
-        reproductionTimer = reproductionTimerMax;
+        reproductionTimer = reproductionWaitTime;
         Action = AnimalAction.Idle;
     }
 
@@ -821,5 +825,16 @@ public class Animal : SimulatedLifeform
         stunTimer = _time;
         stunEffectTimer = 0;
     }
+
+    public void ResetReproductionTime()
+    {
+        reproductionTimer = reproductionWaitTime;
+    }
+
+    public float GetReproductionTime()
+    {
+        return reproductionTimer;
+    }
+
     #endregion
 }

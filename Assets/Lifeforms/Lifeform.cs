@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class Lifeform : MonoBehaviour
 {
-    #region ---=== Auto Assigned/Constant Variables ===---
+    #region ---=== Serialized Variables ===---
+    [Header("Lifeform Variables")]
+    [SerializeField] private float hitPoints = 1;
+    [SerializeField] public float maxHitPoints = 1;
+    #endregion
+
+    #region ---=== Nonserialized Variables ===---
 
     #endregion
 
-    #region ---=== Data Variables ===---
-    //Active Stats
-    [Header("Lifeform Variables")]
-    [SerializeField] private float hitPoints = 1;
+    #region ---=== Get/Set Variables ===---
     public float HitPoints
     {
         get
@@ -28,8 +31,6 @@ public class Lifeform : MonoBehaviour
             }
         }
     }
-    //Base Stats
-    [SerializeField] public float maxHitPoints = 1;
     #endregion
 
     public virtual void Die()

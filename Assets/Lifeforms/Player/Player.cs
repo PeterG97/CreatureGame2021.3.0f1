@@ -22,11 +22,6 @@ public class Player : MonoBehaviour
     {
         rigidBody = GetComponent<Rigidbody2D>();
         playerInput = new PlayerInputActions();
-
-        //Subscribe to input event
-        playerInput.Player.Push.performed += PushPerformed;
-        playerInput.Player.Shoot.performed += _ => shooting = true;
-        playerInput.Player.Shoot.canceled += _ => shooting = false;
     }
 
     private void FixedUpdate()
@@ -42,11 +37,19 @@ public class Player : MonoBehaviour
     private void OnEnable()
     {
         playerInput.Enable();
+
+        playerInput.Player.Push.performed += PushPerformed;
+        playerInput.Player.Shoot.performed += _ => shooting = true;
+        playerInput.Player.Shoot.canceled += _ => shooting = false;
     }
 
     private void OnDisable()
     {
         playerInput.Disable();
+
+        playerInput.Player.Push.performed -= PushPerformed;
+        playerInput.Player.Shoot.performed -= _ => shooting = true;
+        playerInput.Player.Shoot.canceled -= _ => shooting = false;
     }
 
     private void PushPerformed(InputAction.CallbackContext context)
