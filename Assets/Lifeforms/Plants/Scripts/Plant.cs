@@ -11,7 +11,9 @@ public class Plant : SimulatedLifeform
     [SerializeField] public Vector2Int gridLocation;
     [Header("Growth")]
     [SerializeField] public float growRate = 1f; //Will decrease with better abilities
-    //[Header("Abilities")]
+    [Header("Derived Abilities")]
+    [NonSerialized] public float reproductionWaitTime = 10f; //Time in between breeding
+    [Header("Abilities")]
     [Header("Reproduction")]
     [SerializeField] public float reproduceThreshold = 0.75f;
 
@@ -21,23 +23,34 @@ public class Plant : SimulatedLifeform
     #endregion
 
     #region ---=== Nonserialized Variables ===---
+    [NonSerialized] public SpriteRenderer sprite;
+
     [NonSerialized] private float sortZOffset = 0.2f; //TODO temp fix
 
     [Header("Timers")]
     [NonSerialized] private float growthUpdateTimerMax = 1f;
-    [NonSerialized] public float reproductionTimerMax = 10f; //Time in between breeding
     #endregion
 
     #region ---=== Get/Set Variables ===---
 
     #endregion
 
+    private void Awake()
+    {
+        sprite = transform.GetChild(0).GetComponentInChildren<SpriteRenderer>();
+    }
 
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
 
-        Nutrition += growRate; //Will automatically decrement DecomposeTimer when dead
+        if (dead)
+        {
+            Decaying();
+            return;
+        }
+
+        Nutrition += growRate;
 
         growthUpdateTimer -= Time.deltaTime;
         if (growthUpdateTimer <= 0)
@@ -49,15 +62,20 @@ public class Plant : SimulatedLifeform
         if (reproductionTimer <= 0 && Nutrition / maxNutrition > reproduceThreshold)
         {
             if (LifeformManager.Instance.PlantReproduction(this) == null)
-                reproductionTimer = reproductionTimerMax; //Failed wait to try again
+                reproductionTimer = reproductionWaitTime; //Failed wait to try again
         }
     }
 
     private void OnDestroy()
     {
-        LifeformManager.Instance.PlantPopulation--;
-        if (MapManager.Instance != null)
-            MapManager.Instance.generalGrid.SetValue(gridLocation, 0);
+        //Normally plants decrement this counter when they enter the dead state so this is for when they are destroyed before death
+        if (!dead)
+        {
+            if (LifeformManager.Instance != null)
+                LifeformManager.Instance.PlantPopulation--;
+            if (MapManager.Instance != null)
+                MapManager.Instance.generalGrid.SetValue(gridLocation, 0);
+        }
     }
 
     public void Resize()
@@ -75,6 +93,41 @@ public class Plant : SimulatedLifeform
 
     public void Randomize()
     {
-        LifeformManager.Instance.RandomizePlant(this);
+        if (!dead)
+            LifeformManager.Instance.RandomizePlant(this);
+    }
+
+    public void AfterReproduce(float _deathAgeLost)
+    {
+        //Stats lost
+        deathAge -= maxAge * _deathAgeLost;
+
+        //Timer
+        reproductionTimer = reproductionWaitTime;
+    }
+
+    public override void Die()
+    {
+        if (dead)
+            return;
+
+        dead = true;
+        Nutrition = 1;
+
+        if (LifeformManager.Instance != null)
+            LifeformManager.Instance.PlantPopulation--;
+        if (MapManager.Instance != null)
+            MapManager.Instance.generalGrid.SetValue(gridLocation, 0);
+    }
+
+    public void Decaying()
+    {
+        transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.01f);
+        sprite.color = Color.Lerp(sprite.color, Color.black, 0.01f);
+
+        if (transform.localScale.x < 0.05f)
+        {
+            Destroy(gameObject);
+        }
     }
 }

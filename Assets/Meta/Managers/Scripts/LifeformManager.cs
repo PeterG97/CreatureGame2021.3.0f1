@@ -24,9 +24,10 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     #endregion
 
     #region ---=== Nonserialized Variables ===---
-    //References
+    //Object references
     [NonSerialized] private GameObject plantSceneParent;
     [NonSerialized] private GameObject animalSceneParent;
+
     //Population tracker for performance menu
     [NonSerialized] private int plantPopulation;
     [NonSerialized] private int animalPopulation;
@@ -156,17 +157,17 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     public void RandomizePlant(Plant _plant)
     {
         //Age
-        _plant.maxAge = LifeformValues.plantMaxAge * UnityEngine.Random.Range(1 - LifeformValues.ageVariation, 1 + LifeformValues.ageVariation);
+        _plant.maxAge = LifeformValues.PlantMaxAge * UnityEngine.Random.Range(1 - LifeformValues.AgeVariation, 1 + LifeformValues.AgeVariation);
 
         //Body
-        _plant.size = UnityEngine.Random.Range(LifeformValues.plantMinSpawnSize, LifeformValues.plantMaxSpawnSize);
+        _plant.size = UnityEngine.Random.Range(LifeformValues.PlantMinSpawnSize, LifeformValues.PlantMaxSpawnSize);
         _plant.color = Color.HSVToRGB(UnityEngine.Random.Range(0, 1f), UnityEngine.Random.Range(0, 1f), UnityEngine.Random.Range(0.7f, 1f));
 
         _plant.plantIndex = UnityEngine.Random.Range(0, plantSprites.Length);
 
-        //Reproduction
-        _plant.reproductionTimerMax = UnityEngine.Random.Range(LifeformValues.reproductionAgePercentMin * _plant.maxAge,
-                                                               LifeformValues.reproductionAgePercentMax * _plant.maxAge);
+        //Turn into ability TODO
+        _plant.reproductionWaitTime = UnityEngine.Random.Range(LifeformValues.PlantReproductionTimePercentMin * _plant.maxAge,
+                                                               LifeformValues.PlantReproductionTimePercentMax * _plant.maxAge);
 
         //Abilities
 
@@ -176,21 +177,21 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     public void RandomizeAnimal(Animal _animal)
     {
         //Age
-        _animal.maxAge = LifeformValues.animalMaxAge * UnityEngine.Random.Range(1 - LifeformValues.ageVariation, 1 + LifeformValues.ageVariation);
+        _animal.maxAge = LifeformValues.AnimalMaxAge * UnityEngine.Random.Range(1 - LifeformValues.AgeVariation, 1 + LifeformValues.AgeVariation);
         _animal.deathAge = _animal.maxAge; //Even though this is a derived stat that is in UpdateAnimalAll is not set Age cannot be set without death
-        if (UnityEngine.Random.value < LifeformValues.newSpawnChildChance)
+        if (UnityEngine.Random.value < LifeformValues.NewSpawnChildChance)
             _animal.adult = false;
         else
         {
             _animal.adult = true;
-            _animal.Age = LifeformValues.animalAdultAgePercent * _animal.maxAge;
+            _animal.Age = LifeformValues.AnimalAdultAgePercent * _animal.maxAge;
         }
 
         //Body
-        _animal.size = UnityEngine.Random.Range(LifeformValues.animalMinSpawnSize, LifeformValues.animalMaxSpawnSize);
+        _animal.size = UnityEngine.Random.Range(LifeformValues.AnimalMinSpawnSize, LifeformValues.AnimalMaxSpawnSize);
         _animal.color = Color.HSVToRGB(UnityEngine.Random.Range(0, 1f),
                                        UnityEngine.Random.Range(0, 1f),
-                                       UnityEngine.Random.Range(LifeformValues.minColorValue, 1f));
+                                       UnityEngine.Random.Range(LifeformValues.MinColorValue, 1f));
         
         _animal.bodyIndex = UnityEngine.Random.Range(0, bodySprites.Length);
         _animal.eyeIndex = UnityEngine.Random.Range(0, eyeSprites.Length);
@@ -198,20 +199,18 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         //Behavior
         _animal.sexualReproduction = true;
-        if (UnityEngine.Random.value < LifeformValues.chanceAsexual)
+        if (UnityEngine.Random.value < LifeformValues.ChanceAsexual)
             _animal.sexualReproduction = false;
         _animal.diet = RandomAnimalDiet();
         _animal.nature = RandomAnimalNature();
-        _animal.moveStyle = (AnimalMoveStyle)UnityEngine.Random.Range(0, Enum.GetValues(typeof(AnimalMoveStyle)).Length);
-
-        //Reproduction
-        _animal.reproductionWaitTime = UnityEngine.Random.Range(LifeformValues.reproductionAgePercentMin * _animal.maxAge,
-                                                                LifeformValues.reproductionAgePercentMax * _animal.maxAge);
+        _animal.social = RandomAnimalSocial();
 
         //Abilities
-        _animal.sight = UnityEngine.Random.Range(LifeformValues.animalsMinSight, LifeformValues.animalsMaxSight);
-        _animal.attackPower = UnityEngine.Random.Range(LifeformValues.animalsAttackMin, LifeformValues.animalsAttackMax);
-        _animal.hitPointsRegenSpeed = UnityEngine.Random.Range(0, LifeformValues.animalsHPRegenMax);
+        _animal.sight = UnityEngine.Random.Range(LifeformValues.AnimalsMinSight, LifeformValues.AnimalsMaxSight);
+        _animal.attackPower = UnityEngine.Random.Range(LifeformValues.AnimalsAttackMin, LifeformValues.AnimalsAttackMax);
+        _animal.hitPointsRegenSpeed = UnityEngine.Random.Range(0, LifeformValues.AnimalsHPRegenMax);
+        _animal.reproductionNegatives = UnityEngine.Random.Range(LifeformValues.AnimalReproductionNegativesMin, LifeformValues.AnimalReproductionNegativesMax);
+        _animal.reproductionWaitTime = LifeformValues.AnimalReproductionTimePercent * _animal.maxAge * _animal.reproductionNegatives;
 
         UpdateAnimal(_animal);
     }
@@ -219,7 +218,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     public Animal AnimalSexualReproduction(Animal _animal1, Animal _animal2)
     {
         Animal _baby = SpawnNewAnimal(_animal1.transform.position);
-        float variationMult = 1 - LifeformValues.reproductionGeneticVariation;
+        float variationMult = 1 - LifeformValues.ReproductionGeneticVariation;
 
         //Info
         if (_animal1.generations >= _animal2.generations)
@@ -245,14 +244,14 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         V1 = (V1 + V2) / 2;
 
         V1 = UnityEngine.Random.Range(V1 * variationMult, V1 / variationMult);
-        if (V1 < LifeformValues.minColorValue)
-            V1 = LifeformValues.minColorValue;
+        if (V1 < LifeformValues.MinColorValue)
+            V1 = LifeformValues.MinColorValue;
 
         _baby.color = Color.HSVToRGB(UnityEngine.Random.Range(H1 * variationMult, H1 / variationMult),
                                      UnityEngine.Random.Range(S1 * variationMult, S1 / variationMult),
                                      V1);
 
-        if (UnityEngine.Random.value < LifeformValues.reproductionGeneticVariation) //Low chance for random body
+        if (UnityEngine.Random.value < LifeformValues.ReproductionGeneticVariation) //Low chance for random body
             _baby.bodyIndex = UnityEngine.Random.Range(0, bodySprites.Length);
         else
         {
@@ -261,7 +260,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
             else
                 _baby.bodyIndex = _animal2.bodyIndex;
         }
-        if (UnityEngine.Random.value < LifeformValues.reproductionGeneticVariation) //Low chance for random eye
+        if (UnityEngine.Random.value < LifeformValues.ReproductionGeneticVariation) //Low chance for random eye
             _baby.eyeIndex = UnityEngine.Random.Range(0, eyeSprites.Length);
         else
         {
@@ -270,7 +269,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
             else
                 _baby.eyeIndex = _animal2.eyeIndex;
         }
-        if (UnityEngine.Random.value < LifeformValues.reproductionGeneticVariation) //Low chance for random mouth
+        if (UnityEngine.Random.value < LifeformValues.ReproductionGeneticVariation) //Low chance for random mouth
             _baby.mouthIndex = UnityEngine.Random.Range(0, mouthSprites.Length);
         else
         {
@@ -281,7 +280,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         }
 
         //Behavior
-        if (UnityEngine.Random.value < LifeformValues.reproductionDietVariation) //Low chance for different Diet
+        if (UnityEngine.Random.value < LifeformValues.ReproductionDietVariation) //Low chance for different Diet
             _baby.diet = RandomAnimalDiet();
         else
         {
@@ -291,7 +290,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
                 _baby.diet = _animal2.diet;
         }
 
-        if (UnityEngine.Random.value < LifeformValues.reproductionBehaviorVariation) //Low chance for different nature
+        if (UnityEngine.Random.value < LifeformValues.ReproductionBehaviorVariation) //Low chance for different nature
             _baby.nature = RandomAnimalNature();
         else
         {
@@ -301,17 +300,17 @@ public class LifeformManager : MonoSingleton<LifeformManager>
                 _baby.nature = _animal2.nature;
         }
 
-        if (UnityEngine.Random.value < LifeformValues.reproductionBehaviorVariation) //Low chance for different nature
-            _baby.moveStyle = (AnimalMoveStyle)UnityEngine.Random.Range(0, Enum.GetValues(typeof(AnimalMoveStyle)).Length);
+        if (UnityEngine.Random.value < LifeformValues.ReproductionBehaviorVariation) //Low chance for different social
+            _baby.social = RandomAnimalSocial();
         else
         {
             if (UnityEngine.Random.value > 0.5f)
-                _baby.moveStyle = _animal1.moveStyle;
+                _baby.social = _animal1.social;
             else
-                _baby.moveStyle = _animal2.moveStyle;
+                _baby.social = _animal2.social;
         }
 
-        if (UnityEngine.Random.value < LifeformValues.reproductionTypeVariation) //Low chance to become asexual
+        if (UnityEngine.Random.value < LifeformValues.ReproductionTypeVariation) //Low chance to become asexual
             _baby.sexualReproduction = false;
         else
             _baby.sexualReproduction = true;
@@ -330,6 +329,10 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         float parentsRegenSpeed = (_animal1.hitPointsRegenSpeed + _animal2.hitPointsRegenSpeed) / 2;
         _baby.hitPointsRegenSpeed = UnityEngine.Random.Range(parentsRegenSpeed * variationMult, parentsRegenSpeed / variationMult);
 
+        float parentsReproductionNegatives = (_animal1.reproductionNegatives + _animal2.reproductionNegatives) / 2;
+        _baby.reproductionNegatives = UnityEngine.Random.Range(parentsReproductionNegatives * variationMult, parentsReproductionNegatives / variationMult);
+        _baby.reproductionNegatives = Mathf.Clamp(_baby.reproductionNegatives, 0.1f, 2f);
+
         //Update Baby
         _baby.adult = false;
         UpdateAnimal(_baby);
@@ -338,8 +341,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _baby.parents.Add(_animal2);
 
         //Update Parents
-        _animal1.AfterBreed(LifeformValues.sexualNutritionLost, LifeformValues.sexualDeathAgeLost);
-        _animal2.AfterBreed(LifeformValues.sexualNutritionLost, LifeformValues.sexualDeathAgeLost);
+        _animal1.AfterReproduce(LifeformValues.SexualNutritionLost, LifeformValues.SexualDeathAgeLost);
+        _animal2.AfterReproduce(LifeformValues.SexualNutritionLost, LifeformValues.SexualDeathAgeLost);
 
         return _baby;
     }
@@ -348,7 +351,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     {
         Animal _baby = SpawnNewAnimal(_animal.transform.position);
 
-        float variationMult = 1 - LifeformValues.reproductionGeneticVariation;
+        float variationMult = 1 - LifeformValues.ReproductionGeneticVariation;
 
         //Info
         _baby.generations = _animal.generations + 1;
@@ -364,8 +367,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         Color.RGBToHSV(_animal.color, out float H1, out float S1, out float V1);
 
         V1 = UnityEngine.Random.Range(V1 * variationMult, V1 / variationMult);
-        if (V1 < LifeformValues.minColorValue)
-            V1 = LifeformValues.minColorValue;
+        if (V1 < LifeformValues.MinColorValue)
+            V1 = LifeformValues.MinColorValue;
 
         _baby.color = Color.HSVToRGB(UnityEngine.Random.Range(H1 * variationMult, H1 / variationMult),
                                      UnityEngine.Random.Range(S1 * variationMult, S1 / variationMult),
@@ -391,29 +394,25 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         }
 
         //Behavior
-        if (UnityEngine.Random.value < LifeformValues.reproductionDietVariation) //Low chance for different Diet
+        if (UnityEngine.Random.value < LifeformValues.ReproductionDietVariation) //Low chance for different Diet
             _baby.diet = RandomAnimalDiet();
         else
             _baby.diet = _animal.diet;
 
-        if (UnityEngine.Random.value < LifeformValues.reproductionBehaviorVariation) //Low chance for different nature
+        if (UnityEngine.Random.value < LifeformValues.ReproductionBehaviorVariation) //Low chance for different nature
             _baby.nature = RandomAnimalNature();
         else
         {
             _baby.nature = _animal.nature;
         }
-
-        if (UnityEngine.Random.value < LifeformValues.reproductionBehaviorVariation) //Low chance for different nature
-            _baby.moveStyle = (AnimalMoveStyle)UnityEngine.Random.Range(0, Enum.GetValues(typeof(AnimalMoveStyle)).Length);
+        if (UnityEngine.Random.value < LifeformValues.ReproductionBehaviorVariation) //Low chance for different social
+            _baby.social = RandomAnimalSocial();
         else
         {
-            if (UnityEngine.Random.value > 0.5f)
-                _baby.moveStyle = _animal.moveStyle;
-            else
-                _baby.moveStyle = _animal.moveStyle;
+            _baby.social = _animal.social;
         }
 
-        if (UnityEngine.Random.value < LifeformValues.reproductionTypeVariation) //Low chance to become sexual
+        if (UnityEngine.Random.value < LifeformValues.ReproductionTypeVariation) //Low chance to become sexual
             _baby.sexualReproduction = true;
         else
             _baby.sexualReproduction = false;
@@ -425,6 +424,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _baby.sight = UnityEngine.Random.Range(_animal.sight * variationMult, _animal.sight / variationMult);
         _baby.attackPower = UnityEngine.Random.Range(_animal.attackPower * variationMult, _animal.attackPower / variationMult);
         _baby.hitPointsRegenSpeed = UnityEngine.Random.Range(_animal.hitPointsRegenSpeed * variationMult, _animal.hitPointsRegenSpeed / variationMult);
+        _baby.reproductionNegatives = UnityEngine.Random.Range(_animal.reproductionNegatives * variationMult, _animal.reproductionNegatives / variationMult);
+        _baby.reproductionNegatives = Mathf.Clamp(_baby.reproductionNegatives, 0.1f, 2f);
 
         //Update Baby
         _baby.adult = false;
@@ -433,7 +434,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _baby.parents.Add(_animal);
 
         //Update Parent
-        _animal.AfterBreed(LifeformValues.sexualNutritionLost, LifeformValues.asexualDeathAgeLost);
+        _animal.AfterReproduce(LifeformValues.SexualNutritionLost, LifeformValues.AsexualDeathAgeLost);
 
         return _baby;
     }
@@ -449,7 +450,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         if (_baby == null)
             return _baby;
 
-        float variationMult = 1 - LifeformValues.reproductionGeneticVariation;
+        float variationMult = 1 - LifeformValues.ReproductionGeneticVariation;
 
         //Info
         _baby.generations = _plant.generations + 1;
@@ -480,19 +481,18 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         }
 
         //Reproduction
-        _baby.reproductionTimerMax = UnityEngine.Random.Range(_plant.reproductionTimerMax * variationMult, _plant.reproductionTimerMax / variationMult);
+        _baby.reproductionWaitTime = UnityEngine.Random.Range(_plant.reproductionWaitTime * variationMult, _plant.reproductionWaitTime / variationMult);
 
         //Abilities
         //_baby.sight = UnityEngine.Random.Range(_plant.sight * variationMult, _plant.sight / variationMult);
 
         //Update Baby
         UpdatePlant(_baby);
-        _baby.Nutrition = _baby.maxNutrition * LifeformValues.babyPlantStartingNutrition;
+        _baby.Nutrition = _baby.maxNutrition * LifeformValues.BabyPlantStartingNutrition;
         _baby.Resize();
 
         //Update Parents
-        _plant.deathAge -= _plant.maxAge * LifeformValues.plantReproductionDeathAgeLost;
-        _plant.reproductionTimer = _plant.reproductionTimerMax;
+        _plant.AfterReproduce(LifeformValues.PlantReproductionDeathAgeLost);
 
         return _baby;
     }
@@ -503,9 +503,9 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _plant.deathAge = _plant.maxAge;
 
         //Nutrition
-        _plant.maxNutrition = LifeformValues.plantBaseMaxNutrition * Mathf.Pow(_plant.size, LifeformValues.nutritionPower);
-        _plant.Nutrition = UnityEngine.Random.Range(_plant.maxNutrition * LifeformValues.plantStartingNutritionMin,
-                                        _plant.maxNutrition * LifeformValues.plantStartingNutritionMax);
+        _plant.maxNutrition = LifeformValues.PlantBaseMaxNutrition * Mathf.Pow(_plant.size, LifeformValues.NutritionPower);
+        _plant.Nutrition = UnityEngine.Random.Range(_plant.maxNutrition * LifeformValues.PlantStartingNutritionMin,
+                                        _plant.maxNutrition * LifeformValues.PlantStartingNutritionMax);
 
         //Body
         _plant.transform.localScale = new Vector3(_plant.size, _plant.size, _plant.transform.localScale.z);
@@ -518,10 +518,10 @@ public class LifeformManager : MonoSingleton<LifeformManager>
                                                           spriteRenderer.transform.localScale.z);
 
         //Derived Stats
-        _plant.maxHitPoints = Mathf.CeilToInt(LifeformValues.plantBaseHP * Mathf.Pow(_plant.size, LifeformValues.hpPower));
+        _plant.maxHitPoints = Mathf.CeilToInt(LifeformValues.PlantBaseHP * Mathf.Pow(_plant.size, LifeformValues.HpPower));
         _plant.HitPoints = _plant.maxHitPoints;
 
-        _plant.growRate = LifeformValues.plantBaseGrowRate * Mathf.Pow(_plant.size, LifeformValues.nutritionChangeRatePower);
+        _plant.growRate = LifeformValues.PlantBaseGrowRate * Mathf.Pow(_plant.size, LifeformValues.NutritionChangeRatePower);
 
         //Abilities
         //TODO
@@ -542,10 +542,10 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         //Age
         _animal.deathAge = _animal.maxAge;
-        _animal.adultAge = LifeformValues.animalAdultAgePercent * _animal.maxAge;
+        _animal.adultAge = LifeformValues.AnimalAdultAgePercent * _animal.maxAge;
 
         //Nutrition
-        _animal.maxNutrition = LifeformValues.animalsBaseMaxNutrition * Mathf.Pow(_animal.size, LifeformValues.nutritionPower);
+        _animal.maxNutrition = LifeformValues.AnimalsBaseMaxNutrition * Mathf.Pow(_animal.size, LifeformValues.NutritionPower);
 
         //Body
         _animal.transform.localScale = new Vector3(_animal.size, _animal.size, _animal.transform.localScale.z);
@@ -556,34 +556,40 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _animal.slimeParticles.startColor = _animal.color;
 
         //Derived Stats
-        _animal.maxHitPoints = Mathf.CeilToInt(LifeformValues.animalsBaseHP * Mathf.Pow(_animal.size, LifeformValues.hpPower));
+        _animal.maxHitPoints = Mathf.CeilToInt(LifeformValues.AnimalsBaseHP * Mathf.Pow(_animal.size, LifeformValues.HpPower));
         _animal.HitPoints = _animal.maxHitPoints;
 
-        _animal.moveSpeed = LifeformValues.animalsBaseMoveSpeed * Mathf.Pow(_animal.size, LifeformValues.moveSpeedPower);
+        _animal.moveSpeed = LifeformValues.AnimalsBaseMoveSpeed * Mathf.Pow(_animal.size, LifeformValues.MoveSpeedPower);
+        _animal.wanderTimerMax = _animal.size * 3f;
+        _animal.reproductionWaitTime = LifeformValues.AnimalReproductionTimePercent * _animal.maxAge * _animal.reproductionNegatives;
 
         //Abilities (increase hungerRate)
-        _animal.hungerRate = (LifeformValues.animalsBaseHungerRate * Mathf.Pow(_animal.size, LifeformValues.nutritionChangeRatePower))
-                        * (0.5f * _animal.sight + 0.5f) //Sight has a scaling linear relationship 0.5x + 0.5 (1 Sight = 1 hunger)
-                        * (0.1f * _animal.attackPower + 0.8f) //Attack has a scaling linear relationship 0.1x + 0.8 (2 Attack = 1 hunger)
-                        * (10f * _animal.hitPointsRegenSpeed + 0.5f); //Attack has a scaling linear relationship 0.1x + 0.8 (2 Attack = 1 hunger)
-        
+        _animal.hungerRate = (LifeformValues.AnimalsBaseHungerRate * Mathf.Pow(_animal.size, LifeformValues.NutritionChangeRatePower))
+                        * (0.5f * MathF.Pow(_animal.sight, 3) + 0.5f) //Sight has an exponential relationship 0.5x^3 + 0.5 (1 = 1 hunger)
+                        * (0.1f * MathF.Pow(_animal.attackPower, 2) + 0.8f) //Attack has an exponential relationship 0.1x^2 + 0.8 (2 = 1 hunger)
+                        * (1000f * MathF.Pow(_animal.hitPointsRegenSpeed, 2) + 1f) //HP Regen has an exponential relationship 1000x^2 + 1 (0 = 1 hunger, 0.02 = 1.4 hunger)
+                        * (-MathF.Pow(_animal.reproductionNegatives, 3)/10f + 1f); //Reproduction Negatives has an exponential relationship -x^3/10 + 1 (0 = 1 hunger, 1 = 0.9, 2.15 = 0)
+
         //Modified based on sight
-        _animal.GetComponent<CircleCollider2D>().radius = LifeformValues.animalsBaseSightRadius * _animal.sight * _animal.size;
+        _animal.GetComponent<CircleCollider2D>().radius = LifeformValues.AnimalsBaseSightRadius * _animal.sight * _animal.size;
+
+
+        _animal.sprites.localPosition = Vector3.zero;
 
         //Set child stats
         if (!_animal.adult)
         {
-            AnimalMultiplyAgeStats(_animal, LifeformValues.animalChildStatMult);
+            AnimalMultiplyAgeStats(_animal, LifeformValues.AnimalChildStatMult);
             _animal.ResizeChild();
         }
 
         //Calculated after baby check because it changes maxNutrition
-        _animal.Nutrition = UnityEngine.Random.Range(_animal.maxNutrition * LifeformValues.animalStartingNutritionMin,
-                                                     _animal.maxNutrition * LifeformValues.animalStartingNutritionMax);
+        _animal.Nutrition = UnityEngine.Random.Range(_animal.maxNutrition * LifeformValues.AnimalStartingNutritionMin,
+                                                     _animal.maxNutrition * LifeformValues.AnimalStartingNutritionMax);
 
         //Reset control important variables
         _animal.Action = AnimalAction.Idle;
-        _animal.ResetReproductionTime();
+        _animal.reproductionTimer = _animal.reproductionWaitTime;
     }
 
     public float CalcColorSimilarity(Color _firstColor, Color _secondColor)
@@ -644,9 +650,9 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     private AnimalDiet RandomAnimalDiet()
     {
         float dietValue = UnityEngine.Random.value;
-        if (dietValue < LifeformValues.carnivoreChance)
+        if (dietValue < LifeformValues.CarnivoreChance)
             return AnimalDiet.Carnivore;
-        else if (dietValue < LifeformValues.omnivoreChance + LifeformValues.carnivoreChance)
+        else if (dietValue < LifeformValues.OmnivoreChance + LifeformValues.CarnivoreChance)
             return AnimalDiet.Omnivore;
         else
             return AnimalDiet.Herbivore;
@@ -655,12 +661,25 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     private AnimalNature RandomAnimalNature()
     {
         float natureValue = UnityEngine.Random.value;
-        if (natureValue < LifeformValues.violentChance)
+        if (natureValue < LifeformValues.ViolentChance)
             return AnimalNature.Violent;
-        else if (natureValue < LifeformValues.fearfulChance + LifeformValues.violentChance)
+        else if (natureValue < LifeformValues.FearfulChance + LifeformValues.ViolentChance)
             return AnimalNature.Fearful;
         else
             return AnimalNature.Neutral;
+    }
+
+    private AnimalSocial RandomAnimalSocial()
+    {
+        float socialValue = UnityEngine.Random.value;
+        if (socialValue < LifeformValues.FollowerChance)
+            return AnimalSocial.Follower;
+        else if (socialValue < LifeformValues.ProtectiveChance + LifeformValues.FollowerChance)
+            return AnimalSocial.Protective;
+        else if (socialValue < LifeformValues.AntisocialChance + LifeformValues.ProtectiveChance + LifeformValues.FollowerChance)
+            return AnimalSocial.Antisocial;
+        else
+            return AnimalSocial.Neutral;
     }
     #endregion
 }
@@ -713,8 +732,9 @@ public enum AnimalAction
 {
     //Basically their short-term goal which entails moving relative to their target and maybe attempting to interact
     Idle, //Wander random direction, if they find a target this is overruled
-    Attack, //Moving to and attacking targetObj
+    Follow, //Move to friendly targetObj (similar to idle as there is no real goal except for grouping similar animals)
     Run, //Moving away from targetObj
+    Attack, //Moving to and attacking targetObj
     Eat, //Moving to and eating targetObj
     Reproduce //Moveing to and attempting to reproduce with target
 }
@@ -733,11 +753,12 @@ public enum AnimalNature
     Violent //Attack every visable animal
 }
 
-public enum AnimalMoveStyle
+public enum AnimalSocial
 {
-    Normal, //Direct and consistant
-    Burst, //Direct but moves in short bursts, waiting inbetween
-    Hop //Direct hops in cycles
+    Neutral, //No extra behavior
+    Follower, //Tries to follow children if not then follow friendly
+    Protective, //Attacks violent animals
+    Antisocial //Runs from all animals until it needs them
 }
 
 public enum LifeformType

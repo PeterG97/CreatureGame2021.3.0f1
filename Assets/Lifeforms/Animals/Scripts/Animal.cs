@@ -26,23 +26,23 @@ public class Animal : SimulatedLifeform
     [Header("Behavior")]
     [SerializeField] public AnimalDiet diet;
     [SerializeField] public AnimalNature nature;
-    [SerializeField] public AnimalMoveStyle moveStyle;
+    [SerializeField] public AnimalSocial social;
     [Header("Derived Abilities")]
     [SerializeField] public float moveSpeed = 1;
+    [SerializeField] public float reproductionWaitTime = 10f;
     [Header("Advantage Abilities")]
     [SerializeField] public float sight = 1f;
     [SerializeField] public float attackPower = 1f;
     [SerializeField] public float hitPointsRegenSpeed = 0f;
-    [SerializeField] public float reproductionWaitTime = 10f; //TODO not fully impemented as an ability
+    [SerializeField] public float reproductionNegatives = 10f;
     [Header("Reproduction")]
     [SerializeField] public bool sexualReproduction = true;
     [SerializeField] public List<Animal> parents = new List<Animal>();
 
     [Header("Control Variables")]
-    [SerializeField] public bool dead = false;
     [SerializeField] private AnimalAction action;
     [SerializeField] public LifeformObject target; //Context depends on state
-    [SerializeField] public Vector2 wanderPos; //Only used for idle wander
+    [SerializeField] private Vector2 wanderPos; //Only used for idle wander
     [SerializeField] private List<GameObject> detectionList = new List<GameObject>(); //All objects seen since start of detection cooldown
 
     [Header("Timers")] //All count down to 0 or less which permits some action
@@ -51,7 +51,7 @@ public class Animal : SimulatedLifeform
     [SerializeField] private float timeOutTimer = 10f; //Stops action if its taking more than this time
     [SerializeField] private float actionTimer; //Time until able to perform direct interactions such as attacking or eating
     [SerializeField] private float resizeTimer; //Time until updating child and corpse scale (every update disables physics so infrequent is better)
-    [SerializeField] private float reproductionTimer; //Time until able to breed
+    [SerializeField] public float reproductionTimer; //Time until able to breed
     [SerializeField] private float stunTimer; //Time until able to move again
     [SerializeField] private float stunEffectTimer; //Time until a new particle is spawned
     [SerializeField] private float decomposeTimer = 1f; //Time until an animal corpse disappears
@@ -63,13 +63,14 @@ public class Animal : SimulatedLifeform
     [NonSerialized] public Collider2D sightCollider;
     [NonSerialized] public ParticleSystem.MainModule slimeParticles;
     [NonSerialized] private Material bodyMaterial;
+    [NonSerialized] public Transform sprites;
 
     //Constant values
     [NonSerialized] private float interactDistance;
 
     //Time values to reset timers to
     [Header("Timers")]
-    [NonSerialized] private float wanderTimerMax = 3f;
+    [NonSerialized] public float wanderTimerMax = 3f;
     [NonSerialized] private float detectionTimerMax = 2f;
     [NonSerialized] private float timeOutTimerMax = 10f;
     [NonSerialized] private float actionTimerMax = 1f;
@@ -163,10 +164,12 @@ public class Animal : SimulatedLifeform
     #endregion
 
 
+    #region ---=== Basic Methods ===---
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody2D>();
         sightCollider = GetComponent<CircleCollider2D>();
+        sprites = transform.Find("Sprites");
 
         detectionTimer = UnityEngine.Random.Range(0, 1f); //Makes sure many new spawns don't all check their detection collision at the same time
         Action = AnimalAction.Idle; //Default and resets the timeOutTimer
@@ -228,139 +231,173 @@ public class Animal : SimulatedLifeform
     private void OnDestroy()
     {
         //Normally animals decrement this counter when they enter the dead state so this is for when they are destroyed before death
-        if (!dead && LifeformManager.Instance)
+        if (!dead && LifeformManager.Instance != null)
             LifeformManager.Instance.AnimalPopulation--;
     }
+    #endregion
 
+
+    #region ---=== Movement ===---
     public void MovementAndAct()
     {
         if (stunTimer > 0)
         {
-            stunTimer -= Time.deltaTime;
-            stunEffectTimer -= Time.deltaTime;
-            
-            if (stunEffectTimer <= 0)
-            {
-                stunEffectTimer = stunEffectTimerMax;
-
-                GameManager.Instance.PlayStunParticle(transform.position, transform.localScale.x);
-            }
-
+            Stunned();
             return;
         }
 
         actionTimer -= Time.deltaTime;
-        //Idle wander
-        if (Action == AnimalAction.Idle)
+        switch (Action)
         {
-            wanderTimer -= Time.deltaTime;
-
-            Vector2 thisPosition = new Vector2(rigidBody.position.x, rigidBody.position.y);
-
-            if (wanderTimer <= 0) //Pick new wanderPos
-            {
-                wanderPos = new Vector2(thisPosition.x + UnityEngine.Random.Range(-100, 100),
-                                        thisPosition.y + UnityEngine.Random.Range(-100, 100));
-
-                wanderTimer = wanderTimerMax;
-            }
-
-            rigidBody.velocity = (wanderPos - thisPosition).normalized * moveSpeed * Time.deltaTime;
-            return;
-        }
-
-        //If the obj was destroyed
-        if (target == null || target.obj == null)
-        {
-            Action = AnimalAction.Idle;
-            return;
-        }
-
-        //If the obj exists but may have died
-        if (Action == AnimalAction.Attack || Action == AnimalAction.Run || Action == AnimalAction.Reproduce)
-        {
-            if (target.animal.dead)
-            {
-                Action = AnimalAction.Idle;
-                return;
-            }
-        }
-
-        //Otherwise Move to targetObj
-        Vector2 targetPos = new (target.obj.transform.position.x, target.obj.transform.position.y);
-        Vector2 thisPos = new (rigidBody.position.x, rigidBody.position.y);
-        Vector2 direction;
-        if (Action == AnimalAction.Run)
-            direction = (thisPos - targetPos).normalized;
-        else
-            direction = (targetPos - thisPos).normalized;
-        rigidBody.velocity = direction * moveSpeed * Time.deltaTime;
-
-        //Interact if close enough (Attack, eat)
-        if (Action == AnimalAction.Attack && actionTimer <= 0)
-        {
-            RaycastHit2D[] hitResults = Physics2D.RaycastAll(rigidBody.position, direction, interactDistance * size);
-            Debug.DrawRay(rigidBody.position, direction * interactDistance * size, Color.red, 1f, false);
-            for (int i = 0; i < hitResults.Length; i++)
-            {
-                if (!(hitResults[i].collider is CircleCollider2D) &&
-                    (hitResults[i].transform.gameObject == target.obj //If it is intended target or other valid target
-                    || CheckOffensiveAttack(new LifeformObject(hitResults[i].transform.gameObject, LifeformType.Animal))))
+            case AnimalAction.Idle:
+                wanderTimer -= Time.deltaTime;
+                if (wanderTimer <= 0) //Pick new wanderPos
                 {
-                    HitAnimal(target.animal);
-                    break;
+                    wanderTimer = wanderTimerMax;
+                    wanderPos = new Vector2(rigidBody.position.x + UnityEngine.Random.Range(-100, 100),
+                                            rigidBody.position.y + UnityEngine.Random.Range(-100, 100));
                 }
-            }
-        }
-        else if (Action == AnimalAction.Eat && actionTimer <= 0)
-        {
-            RaycastHit2D[] hitResults = Physics2D.RaycastAll(rigidBody.position, direction, interactDistance * size);
-            Debug.DrawRay(rigidBody.position, direction * interactDistance * size, Color.green, 1f, false);
-            for (int i = 0; i < hitResults.Length; i++)
-            {
-                if (hitResults[i].transform.gameObject == target.obj)
+
+                MoveTowardsPosition(wanderPos);
+                break;
+
+            case AnimalAction.Follow:
+                //Target no longer valid
+                if (target == null || target.obj == null || target.animal.dead)
                 {
-                    EatFood(target);
-                    break;
+                    Action = AnimalAction.Idle;
+                    return;
                 }
-            }
-        }
-        else if (Action == AnimalAction.Reproduce && actionTimer <= 0)
-        {
-            if (sexualReproduction)
-            {
-                RaycastHit2D[] hitResults = Physics2D.RaycastAll(rigidBody.position, direction, interactDistance * size);
-                Debug.DrawRay(rigidBody.position, direction * interactDistance * size, Color.cyan, 1f, false);
-                for (int i = 0; i < hitResults.Length; i++)
+
+                //Moves to position and returns direction to target which is used in interaction
+                MoveTowardsPosition(new Vector2(target.obj.transform.position.x, target.obj.transform.position.y));
+                break;
+
+            case AnimalAction.Run:
+                //Target no longer valid
+                if (target == null || target.obj == null || target.animal.dead)
                 {
-                    if (!(hitResults[i].collider is CircleCollider2D) &&
-                        hitResults[i].transform.gameObject == target.obj)
+                    Action = AnimalAction.Idle;
+                    return;
+                }
+
+                //Moves to position and returns direction to target which is used in interaction
+                MoveTowardsPosition(new Vector2(-target.obj.transform.position.x, -target.obj.transform.position.y));
+                break;
+
+            case AnimalAction.Attack:
+                //Target no longer valid
+                if (target == null || target.obj == null || target.animal.dead)
+                {
+                    Action = AnimalAction.Idle;
+                    return;
+                }
+
+                //Moves to position and returns direction to target which is used in interaction
+                Vector2 attackDirection = MoveTowardsPosition(new Vector2(target.obj.transform.position.x, target.obj.transform.position.y));
+
+                if (actionTimer > 0)
+                    break;
+                actionTimer = 0.1f; //Buffer in between raycasts
+
+                RaycastHit2D[] attackResults = Physics2D.RaycastAll(rigidBody.position, attackDirection, interactDistance * size);
+                for (int i = 0; i < attackResults.Length; i++)
+                {
+                    if (!(attackResults[i].collider is CircleCollider2D) &&
+                        (attackResults[i].transform.gameObject == target.obj //If it is intended target or other valid target
+                        || CheckOffensiveAttack(new LifeformObject(attackResults[i].transform.gameObject, LifeformType.Animal))))
                     {
-                        Reproduce(target.animal);
+                        HitAnimal(target.animal);
                         break;
                     }
                 }
-            }
-            else //asexual
-            {
-                Reproduce(null);
-            }
-        }
+                break;
 
-        //Not yet used
-        if (moveStyle == AnimalMoveStyle.Normal)
-        {
+            case AnimalAction.Eat:
+                //Target no longer valid
+                if (target == null || target.obj == null)
+                {
+                    Action = AnimalAction.Idle;
+                    return;
+                }
 
-        }
-        else if (moveStyle == AnimalMoveStyle.Burst)
-        {
+                //Moves to position and returns direction to target which is used in interaction
+                Vector2 eatDirection = MoveTowardsPosition(new Vector2(target.obj.transform.position.x, target.obj.transform.position.y));
 
-        }
-        else if (moveStyle == AnimalMoveStyle.Hop)
-        {
+                if (actionTimer > 0)
+                    break;
+                actionTimer = 0.1f; //Buffer in between raycasts
 
+                RaycastHit2D[] eatResults = Physics2D.RaycastAll(rigidBody.position, eatDirection, interactDistance * size);
+                for (int i = 0; i < eatResults.Length; i++)
+                {
+                    if (eatResults[i].transform.gameObject == target.obj)
+                    {
+                        EatFood(target);
+                        break;
+                    }
+                }
+                break;
+
+            case AnimalAction.Reproduce:
+                //Target no longer valid
+                if (target == null || target.obj == null || target.animal.dead)
+                {
+                    Action = AnimalAction.Idle;
+                    return;
+                }
+
+                //Moves to position and returns direction to target which is used in interaction
+                Vector2 reproduceDirection = MoveTowardsPosition(new Vector2(target.obj.transform.position.x, target.obj.transform.position.y));
+
+                if (actionTimer > 0)
+                    break;
+                actionTimer = 0.1f; //Buffer in between raycasts
+
+                if (sexualReproduction)
+                {
+                    RaycastHit2D[] reproduceResults = Physics2D.RaycastAll(rigidBody.position, reproduceDirection, interactDistance * size);
+                    for (int i = 0; i < reproduceResults.Length; i++)
+                    {
+                        if (!(reproduceResults[i].collider is CircleCollider2D) &&
+                            reproduceResults[i].transform.gameObject == target.obj)
+                        {
+                            Reproduce(target.animal);
+                            break;
+                        }
+                    }
+                }
+                else //asexual
+                {
+                    Reproduce(null);
+                }
+                break;
         }
     }
+
+    private void Stunned()
+    {
+        stunTimer -= Time.deltaTime;
+        stunEffectTimer -= Time.deltaTime;
+
+        if (stunEffectTimer <= 0)
+        {
+            stunEffectTimer = stunEffectTimerMax;
+
+            GameManager.Instance.PlayStunParticle(transform.position, transform.localScale.x);
+        }
+    }
+
+    private Vector2 MoveTowardsPosition(Vector2 _targetPos)
+    {
+        Vector2 thisPos = new(rigidBody.position.x, rigidBody.position.y);
+        Vector2 direction = (_targetPos - thisPos).normalized;
+        rigidBody.velocity = direction * moveSpeed * Time.deltaTime;
+
+        return direction; //Used for interaction
+    }
+    #endregion
+
 
     private void OnTriggerStay2D(Collider2D other)
     {
@@ -388,14 +425,16 @@ public class Animal : SimulatedLifeform
             if (CheckDefensiveAttack(target)) { return; }
             else if (CheckRun(target)) { return; }
             else if (CheckOffensiveAttack(target)) { return; }
-            else { CheckReproduce(target); } //Only if full
+            else if (CheckReproduce(target)) { return; } //Only if full
+            else { CheckFollow(target); } 
         }
         else if (Nutrition / maxNutrition > hungerHuntThreshold) //Decently full
         {
             if (CheckDefensiveAttack(target)) { return; }
             else if (CheckRun(target)) { return; }
             else if (CheckEat(target)) { return; }
-            else { CheckOffensiveAttack(target); }
+            else if (CheckOffensiveAttack(target)) { return; }
+            else { CheckFollow(target); }
         }
         else //Seriously hungry
         {
@@ -422,7 +461,7 @@ public class Animal : SimulatedLifeform
             if (diet == AnimalDiet.Carnivore)
                 return false;
 
-            if (Action == AnimalAction.Idle)
+            if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
                 willEat = true;
             else if (Action == AnimalAction.Eat && CloserNewTarget(target, _lifeform))
                 willEat = true;
@@ -432,7 +471,7 @@ public class Animal : SimulatedLifeform
             if (diet == AnimalDiet.Herbivore || !targetAnimal.dead) //Animal corpses only
                 return false;
 
-            if (Action == AnimalAction.Idle)
+            if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
                 willEat = true;
             else if (Action == AnimalAction.Eat && CloserNewTarget(target, _lifeform))
                 willEat = true;
@@ -458,15 +497,17 @@ public class Animal : SimulatedLifeform
             return false;
 
         //Reasons to attack
+        //1 - Violent and adult
+        //2 - Protective and the animal is violent or the animal is targeting a relative
         if (nature == AnimalNature.Violent && adult
-           || (targetAnimal.target != null && targetAnimal.target.obj == gameObject && nature == AnimalNature.Neutral)) //Neutral and being targetted
+           || (social == AnimalSocial.Protective && (targetAnimal.nature == AnimalNature.Violent || (targetAnimal.target != null && targetAnimal.target.animal && IsRelated(targetAnimal.target.animal)))))
         {
-            if (Action == AnimalAction.Idle)
+            if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
                 willAttack = true;
             else if (Action == AnimalAction.Attack && CloserNewTarget(target, _lifeform))
                 willAttack = true;
         }
-
+        
         if (willAttack)
         {
             target = _lifeform;
@@ -487,9 +528,9 @@ public class Animal : SimulatedLifeform
             return false;
 
         //Reasons to attack
-        if (Action == AnimalAction.Idle && diet != AnimalDiet.Herbivore) //Currently searching for food and can ear animals
+        if (Action == AnimalAction.Idle && diet != AnimalDiet.Herbivore) //Currently searching for food and can eat animals
         {
-            if (Action == AnimalAction.Idle)
+            if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
                 willAttack = true;
             else if (Action == AnimalAction.Attack && CloserNewTarget(target, _lifeform))
                 willAttack = true;
@@ -514,11 +555,14 @@ public class Animal : SimulatedLifeform
         if (!ValidAnimalInteraction(targetAnimal, true, false))
             return false;
 
-        //Reasons to defensive attack
-        //First condition - Neutral and being targetted
-        if (targetAnimal.target != null && targetAnimal.target.obj == gameObject && nature != AnimalNature.Fearful)
+        //Reasons to defensive attack (Both cases check the target's target)
+        //1 - Not fearful and being targetted
+        //2 - Target's target is an animal and that target has this animal as its parent, defend it
+        if (targetAnimal.target != null
+            && ((targetAnimal.target.obj == gameObject && nature != AnimalNature.Fearful)
+            || (targetAnimal.target.animal != null && targetAnimal.target.animal.parents.Contains(this))))
         {
-            if (Action == AnimalAction.Idle)
+            if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
                 willAttack = true;
             else if (Action == AnimalAction.Attack && CloserNewTarget(target, _lifeform))
                 willAttack = true;
@@ -544,13 +588,14 @@ public class Animal : SimulatedLifeform
             return false;
 
         //Reasons to run
-        //First condition - fearful & being targetted
-        //Second condition - hp too low and potential target is able to attack
-        if ((targetAnimal.target != null && targetAnimal.target.obj == gameObject && nature == AnimalNature.Fearful)
-            || (HitPoints / maxHitPoints < hpRunThreshold
-            && (targetAnimal.diet != AnimalDiet.Herbivore || targetAnimal.nature == AnimalNature.Violent))) //Being attacked
+        //1 - antisocial
+        //2 - fearful & being targetted
+        //3 - hp too low and potential target is able to attack
+        if (social == AnimalSocial.Antisocial
+            || (targetAnimal.target != null && targetAnimal.target.obj == gameObject && nature == AnimalNature.Fearful)
+            || (HitPoints / maxHitPoints < hpRunThreshold && (targetAnimal.diet != AnimalDiet.Herbivore || targetAnimal.nature == AnimalNature.Violent)))
         {
-            if (Action != AnimalAction.Run)
+            if (Action != AnimalAction.Run) //Override everything else
                 willRun = true;
             else if (CloserNewTarget(target, _lifeform)) //Prioritize closer threat if already running
                 willRun = true;
@@ -566,6 +611,30 @@ public class Animal : SimulatedLifeform
             return false;
     }
 
+    private bool CheckFollow(LifeformObject _lifeform)
+    {
+        //Animal only
+        Animal targetAnimal = _lifeform.animal;
+        if (!ValidAnimalInteraction(targetAnimal, true, false))
+            return false;
+
+        //Reasons to follow
+        //1 - Is a parent
+        //2 - Is a follower and they are not violent or a carnivore
+        if (parents.Contains(targetAnimal)
+            || (social == AnimalSocial.Follower && targetAnimal.nature != AnimalNature.Violent && targetAnimal.diet != AnimalDiet.Carnivore))
+        {
+            if (Action == AnimalAction.Idle)
+            {
+                target = _lifeform;
+                Action = AnimalAction.Follow; //Resets timeOutTimer
+                return true;
+            }  
+        }
+
+        return false;
+    }
+
     private bool CheckReproduce(LifeformObject _lifeform)
     {
         if (sexualReproduction && CanReproduce(sexualReproduction))
@@ -576,7 +645,7 @@ public class Animal : SimulatedLifeform
                 || !targetAnimal.CanReproduce(sexualReproduction))
                 return false;
 
-            if (Action == AnimalAction.Idle)
+            if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
             {
                 target = _lifeform;
                 Action = AnimalAction.Reproduce; //Resets timeOutTimer
@@ -695,21 +764,26 @@ public class Animal : SimulatedLifeform
         if (_animal == null || _animal == this || (_checkDead && _animal.dead))
             return false;
 
-        if (_checkRelated)
-        {
-            //They are a parent or this is a parent to them
-            if (parents.Contains(_animal) || _animal.parents.Contains(this))
-                return false;
-
-            //They share parents
-            for (int i = 0; i < parents.Count; i++)
-            {
-                if (_animal.parents.Contains(parents[i]))
-                    return false;
-            }
-        }
+        if (_checkRelated && IsRelated(_animal))
+            return false;
 
         return true;
+    }
+
+    private bool IsRelated(Animal _animal)
+    {
+        //They are a parent or this is a parent to them
+        if (parents.Contains(_animal) || _animal.parents.Contains(this))
+            return true;
+
+        //They share parents
+        for (int i = 0; i < parents.Count; i++)
+        {
+            if (_animal.parents.Contains(parents[i]))
+                return true;
+        }
+
+        return false;
     }
 
     private bool CloserNewTarget(LifeformObject _old, LifeformObject _new)
@@ -750,21 +824,26 @@ public class Animal : SimulatedLifeform
     #region ---=== Basic Animal Functions ===---
     public override void Die()
     {
-        LifeformManager.Instance.AnimalPopulation--;
+        if (dead)
+            return;
+
         dead = true;
+        if (LifeformManager.Instance != null)
+            LifeformManager.Instance.AnimalPopulation--;
+
         Nutrition = 0; //Needed if they die from other reasons
         DecomposeTimer = maxNutrition;
 
-        slimeParticles.loop = false;
         GameManager.Instance.PlayAnimalDeathParticle(transform.position, transform.localScale.x);
 
-        //Turn off for performance
+        //Turn off effects and collider
         sightCollider.enabled = false;
+        slimeParticles.loop = false;
+        bodyMaterial.SetFloat("_WarpStrength", 0);
 
         //Update Sprite
-        transform.Find("Sprites").localScale = new Vector3(1, -1, 1); //Resets other changes too
+        sprites.localScale = new Vector3(1, -1, 1); //Resets other changes too
         size = transform.localScale.x;
-        bodyMaterial.SetFloat("_WarpStrength", 0);
     }
 
     public void GrowUp()
@@ -775,7 +854,7 @@ public class Animal : SimulatedLifeform
         age = adultAge;//Age will create a loop
         adult = true;
         GameManager.Instance.PlayAnimalGrowUpParticle(transform.position, transform.localScale.x);
-        LifeformManager.Instance.AnimalMultiplyAgeStats(this, 1 / LifeformValues.animalChildStatMult);
+        LifeformManager.Instance.AnimalMultiplyAgeStats(this, 1 / LifeformValues.AnimalChildStatMult);
     }
 
     public void ResizeChild()
@@ -802,7 +881,7 @@ public class Animal : SimulatedLifeform
         transform.position = new Vector3(transform.position.x, transform.position.y, -(transform.localScale.y - 1) / 2);
     }
 
-    public void AfterBreed(float _nutritionLost, float _deathAgeLost)
+    public void AfterReproduce(float _nutritionLost, float _deathAgeLost)
     {
         //Stats lost
         Nutrition -= maxNutrition * _nutritionLost;
@@ -837,16 +916,5 @@ public class Animal : SimulatedLifeform
         stunTimer = _time;
         stunEffectTimer = 0;
     }
-
-    public void ResetReproductionTime()
-    {
-        reproductionTimer = reproductionWaitTime;
-    }
-
-    public float GetReproductionTime()
-    {
-        return reproductionTimer;
-    }
-
     #endregion
 }

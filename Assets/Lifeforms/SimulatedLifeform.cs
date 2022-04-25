@@ -16,6 +16,7 @@ public class SimulatedLifeform : Lifeform
     [SerializeField] public float deathAge;
     [SerializeField] public float maxNutrition;
     [SerializeField] protected float nutrition;
+    [SerializeField] public bool dead = false;
     #endregion
 
     #region ---=== Nonserialized Variables ===---

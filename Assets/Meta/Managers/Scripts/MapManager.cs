@@ -15,6 +15,8 @@ public class MapManager : MonoSingleton<MapManager>
     [Header("Grid")]
     [SerializeField] public int cellWidth = 16, cellHeight = 9;
     [SerializeField] public float wallDistance = 5;
+    [SerializeField] public float animalSpawnPercent = 10f;
+    [SerializeField] public float plantSpawnPercent = 50f;
     #endregion
 
     #region ---=== Nonserialized Variables ===---
@@ -42,8 +44,6 @@ public class MapManager : MonoSingleton<MapManager>
     [NonSerialized] public Grid generalGrid;
     [NonSerialized] public float mapWidth;
     [NonSerialized] public float mapHeight;
-    [NonSerialized] public float animalSpawnPercent = 5f;
-    [NonSerialized] public float plantSpawnPercent = 40f;
     #endregion
 
     #region ---=== Control Variables ===---

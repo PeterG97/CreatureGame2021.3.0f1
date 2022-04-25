@@ -197,14 +197,13 @@ public class UIManager : MonoSingleton<UIManager>
         //Behavior
         natureText.text = _animal.nature.ToString();
         dietText.text = _animal.diet.ToString();
-        moveStyleText.text = _animal.moveStyle.ToString();
 
         //Reproduction
         if (_animal.sexualReproduction)
             reproductionTypeText.text = "Sexual";
         else
             reproductionTypeText.text = "Asexual";
-        reproductionTimeText.text = _animal.GetReproductionTime().ToString("N1");
+        reproductionTimeText.text = _animal.reproductionTimer.ToString("N1");
 
         //Action
         actionText.text = _animal.Action.ToString();

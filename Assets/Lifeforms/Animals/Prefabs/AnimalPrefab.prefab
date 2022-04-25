@@ -5107,11 +5107,11 @@ MonoBehaviour:
   generations: 0
   size: 1
   color: {r: 1, g: 1, b: 1, a: 1}
-  maxNutrition: 10000
-  nutrition: 10000
+  age: 0
   maxAge: 5
   deathAge: 5
-  age: 0
+  maxNutrition: 10000
+  nutrition: 10000
   bodyIndex: 0
   eyeIndex: 0
   mouthIndex: 0
@@ -5123,14 +5123,16 @@ MonoBehaviour:
   hpRunThreshold: 0.5
   diet: 0
   nature: 0
-  moveStyle: 0
+  social: 0
   moveSpeed: 1
+  reproductionWaitTime: 10
   sight: 1
   attackPower: 1
   hitPointsRegenSpeed: 0
+  reproductionNegatives: 10
   sexualReproduction: 1
   parents: []
-  decomposeTimer: 100
+  dead: 0
   action: 0
   wanderPos: {x: 0, y: 0}
   detectionList: []
@@ -5141,8 +5143,8 @@ MonoBehaviour:
   resizeTimer: 0
   reproductionTimer: 1
   stunTimer: 0
-  stunEffectTimerMax: 1
   stunEffectTimer: 0
+  decomposeTimer: 100
 --- !u!50 &7037702947848651880
 Rigidbody2D:
   serializedVersion: 4
@@ -5205,7 +5207,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 4
+  m_Radius: 3
 --- !u!1 &6594861983616854242
 GameObject:
   m_ObjectHideFlags: 0

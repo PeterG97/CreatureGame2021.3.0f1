@@ -5,12 +5,13 @@ using System;
 using UnityEngine.SceneManagement;
 
 #region ---=== TODO ===---
-/*
+/* Plant abilities
  * Adjust depth sorting for outline (either add basic offset to help a little or track line width in script)
- * Add movement behaviors
- * Add social behavior (follower, protective, antisocial)
- * Tile map grass, sand, water
  * Plant wind shader stutter
+ * 
+ * Feature creep:
+ * Add attack animation between fighting animals for clarity
+ * Tile map grass, sand, water
  * Research best practice universal input system
  * UI Overhaul (Maybe new ui system)
  * Implement better age & reproduction timer spawing (some animals spawn near death) */
