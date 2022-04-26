@@ -1,21 +1,22 @@
+/* Contains references to relevant UI components, captures mouse events, has methods to update
+ * UI information, and methods to update game data based on player submitted UI information
+ * 
+ * Dependent on classes:
+ * PermanentMonoSingleton - GameManager
+ * MonoSingleton - LifeformManager (If the UICanvas events are activated)
+ * MonoSingleton - MapManager (If the UICanvas events are activated) */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
+using TMPro;
 
 public class UIManager : MonoSingleton<UIManager>
 {
-    /* Dependent on Classes:
-     * PermanentMonoSingleton - GameManager
-     * MonoSingleton - LifeformManager (If the UICanvas events are activated)
-     * MonoSingleton - MapManager (If the UICanvas events are activated) */
-
     #region ---=== Nonserialized Variables ===---
     //State variables
     [NonSerialized] private bool isOverUI;
@@ -305,22 +306,22 @@ public class UIManager : MonoSingleton<UIManager>
 
         //Abilities
         Transform abilitiesRow1 = animalInfoMenuTransform.Find("AbilitiesRow1");
-        hpRegenText = abilitiesRow1.Find("HPRegenText").GetComponent<TMP_Text>(); ;
-        attackText = abilitiesRow1.Find("AttackText").GetComponent<TMP_Text>(); ;
+        hpRegenText = abilitiesRow1.Find("HPRegenText").GetComponent<TMP_Text>();
+        attackText = abilitiesRow1.Find("AttackText").GetComponent<TMP_Text>();
         Transform abilitiesRow2 = animalInfoMenuTransform.Find("AbilitiesRow2");
-        sightText = abilitiesRow2.Find("SightText").GetComponent<TMP_Text>(); ;
+        sightText = abilitiesRow2.Find("SightText").GetComponent<TMP_Text>();
 
         //Behavior
         Transform behaviorRow1 = animalInfoMenuTransform.Find("BehaviorRow1");
-        natureText = behaviorRow1.Find("NatureText").GetComponent<TMP_Text>(); ;
-        dietText = behaviorRow1.Find("DietText").GetComponent<TMP_Text>(); ;
+        natureText = behaviorRow1.Find("NatureText").GetComponent<TMP_Text>();
+        dietText = behaviorRow1.Find("DietText").GetComponent<TMP_Text>();
         Transform behaviorRow2 = animalInfoMenuTransform.Find("BehaviorRow2");
-        moveStyleText = behaviorRow2.Find("MoveStyleText").GetComponent<TMP_Text>(); ;
+        moveStyleText = behaviorRow2.Find("MoveStyleText").GetComponent<TMP_Text>();
 
         //Reproduction
         Transform reproductionRow = animalInfoMenuTransform.Find("ReproductionRow");
-        reproductionTypeText = reproductionRow.Find("TypeText").GetComponent<TMP_Text>(); ;
-        reproductionTimeText = reproductionRow.Find("TimeText").GetComponent<TMP_Text>(); ;
+        reproductionTypeText = reproductionRow.Find("TypeText").GetComponent<TMP_Text>();
+        reproductionTimeText = reproductionRow.Find("TimeText").GetComponent<TMP_Text>();
 
         //Action
         Transform actionRow = animalInfoMenuTransform.Find("ActionRow");
@@ -329,10 +330,10 @@ public class UIManager : MonoSingleton<UIManager>
 
     private void DelayedMeasurements()
     {
+        //Has to be delayed because auto sized UI elements are stupid
         if (!CheckNull.SingleInstanceNotNull(ref UICanvas, false) || optionsMenuTransform == null)
             return;
 
-        //Has to be delayed because it auto sized things are stupid and this method is stupid too
         hideOptionsDistance = optionsMenuTransform.sizeDelta.y
                       - optionsMenuTransform.Find("HideMenu").GetComponent<RectTransform>().sizeDelta.y
                       - optionsMenuTransform.GetComponent<LayoutGroup>().padding.bottom;

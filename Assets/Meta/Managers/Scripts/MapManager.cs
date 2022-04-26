@@ -1,3 +1,11 @@
+/* Saves variables related to the grid system such as size and the object that are used to
+ * construct the grid (borders and background), contains methods to initialize and reset the
+ * grid. This file also contains the Grid class which has functions for managing the Grid type.
+ * 
+ * Dependent on classes:
+ * PermanentMonoSingleton - GameManager
+ * MonoSingleton - LifeformManager */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,10 +13,6 @@ using UnityEngine;
 
 public class MapManager : MonoSingleton<MapManager>
 {
-    /* Dependent on Classes:
-     * PermanentMonoSingleton - GameManager
-     * MonoSingleton - LifeformManager */
-
     #region ---=== Serialized Variables ===---
     [Header("Editor Tools")]
     [SerializeField] public bool respawnAll = false;

@@ -1,7 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
+/* A class that is inherited by both plants and animals and contains variables and function
+ * that both use such as age and size. This class is meant for all life forms that have a life
+ * and death cycle based on age as well as customizable traits such size and color.
+ * 
+ * Dependent on no classes */
+
 using UnityEngine;
-using System;
 
 public class SimulatedLifeform : Lifeform
 {

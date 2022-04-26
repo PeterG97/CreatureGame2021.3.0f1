@@ -1,7 +1,12 @@
+/* Handles camera movement and zoom (uses orthographic size). Right now only tracks the player
+ * if one exists. The game sorts depth based on the Y and Z axes.
+ * 
+ * Dependent on no classes */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using UnityEngine.InputSystem.UI;
 
 public class CameraManager : MonoSingleton<CameraManager>

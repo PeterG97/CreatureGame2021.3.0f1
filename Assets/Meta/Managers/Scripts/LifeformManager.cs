@@ -1,13 +1,27 @@
+/* Contains the functions to create and initialize plants and animals and stores references to
+ * various assets used for setting up lifeforms. Lifeforms can be spawned using the
+ * SpawnNewPlant/Animal methods. After spawning, lifeforms need to either be sent to the Randomize
+ * methods or have their base values directly set. RandomizePlant/Animal chooses all of their
+ * values based on the potential starting ranges defined by the Lifeform Values scriptable object
+ * which acts as a central definition of lifeform properties. After a lifeform has its base traits
+ * setup or changed it needs to be updated in the UpdatePlant/Animal methods which updates the
+ * visuals and its derived values based on its base values as well as resetting its timers and
+ * hunger/hp. The LifeformManager class also includes reproduction methods for both plants and
+ * animals which chooses traits for their child based on the parents with some random variation
+ * added on top. This file also contains the LifeformObjects class which is used to refer to
+ * objects that could be either a plant or animal while linking their lifeform class to their
+ * game object. And there are some enum values that plants and animals use at the bottom of the file.
+ * 
+ * Dependent on classes:
+ * PermanentMonoSingleton - GameManager */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class LifeformManager : MonoSingleton<LifeformManager>
 {
-    /* Dependent on Classes:
-     * PermanentMonoSingleton - GameManager */
-
     #region ---=== Serialized Variables ===---
     //Reference to scriptable object which will be copied for runtime instance
     [SerializeField] private LifeformValues lifeformValuesBase;

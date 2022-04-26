@@ -1,14 +1,16 @@
+/* Contains player data, movement logic, action logic, and the input system to initiate those actions.
+ * Right now the player can only move, collide with physics objects, and shoot a stunning bullet at animals.
+ * 
+ * Dependent on no classes */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
 
-public class Player : MonoBehaviour
+public class Player : Lifeform
 {
-    /* Dependent on no Classes */
-
     [SerializeField] private GameObject bulletPrefab;
     [NonSerialized] public Rigidbody2D rigidBody;
     [NonSerialized] public PlayerInputActions playerInput;

@@ -1,14 +1,25 @@
+/* Contains individualized animal data, movement logic, detection logic, interaction logic,
+ * and many basic animal functions such as death and aging. Uses a Rigidbody2D and velocity to
+ * move which is handled in the first part of the MoveAndAct method. Uses a circular Collider2D
+ * trigger to detect and process other objects (looks for animals and plants) and decides what
+ * to do with them within the OnTriggerStay2D method. If the animal decides to do an action it
+ * moves towards its target and in the second part of the MoveAndAct method it will periodically
+ * fire a small Physics2D raycast towards its target. The animal will either hit the animal and
+ * initiate a direct interaction or fail and reset because it took too long. The default state
+ * for an animal is AnimalAction.Idle in which it will only wander around until it find a target
+ * and a reason to interact with that target.
+ * 
+ * Dependent on classes:
+ * PermanentMonoSingleton - GameManager
+ * MonoSingleton - LifeformManager */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class Animal : SimulatedLifeform
 {
-    /* Dependent on Classes:
-     * PermanentMonoSingleton - GameManager
-     * MonoSingleton - LifeformManager */
-
     #region ---=== Serialized Variables ===---
     [Header("Animal Attributes")]
     [Header("Body")]
@@ -93,10 +104,7 @@ public class Animal : SimulatedLifeform
     }
     public float DecomposeTimer
     {
-        get
-        {
-            return decomposeTimer;
-        }
+        get { return decomposeTimer; }
         set
         {
             decomposeTimer = value;
@@ -399,6 +407,7 @@ public class Animal : SimulatedLifeform
     #endregion
 
 
+    #region ---=== Detection ===---
     private void OnTriggerStay2D(Collider2D other)
     {
         if (detectionTimer <= 0)
@@ -445,6 +454,7 @@ public class Animal : SimulatedLifeform
             else { CheckRun(target); }
         }
     }
+    #endregion
 
 
     #region ---=== Detection Decisions ===---
@@ -458,7 +468,7 @@ public class Animal : SimulatedLifeform
 
         if (targetPlant != null)
         {
-            if (diet == AnimalDiet.Carnivore)
+            if (diet == AnimalDiet.Carnivore || targetPlant.dead)
                 return false;
 
             if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions

@@ -96,7 +96,9 @@ public class Movement : MonoBehaviour
 
 public class PermanentMonoSingleton<T> : MonoBehaviour where T : Component
 {
-    //Will generate if referenced and not yet existing and will delete all other copies
+    //Will generate if referenced and not yet existing
+    //Will also delete other copies if multiple exist (Logs error as this should not happen)
+    //Loads from a prefab in the resouces folder so all references and varaibles are consistent
 
     public static bool shutdown = false;
 
@@ -146,7 +148,7 @@ public class PermanentMonoSingleton<T> : MonoBehaviour where T : Component
 
     protected virtual void Awake()
     {
-        //Deletes singleton copies that may spawn durring the game
+        //Deletes other singleton copies that may spawn durring the game
         if (_instance != null)
         {
             //If gameObject has the same name as the class then it is assumed the object exists for the class and should be destroyed
@@ -206,7 +208,7 @@ public class MonoSingleton<T> : MonoBehaviour where T : Component
 
     protected virtual void Awake()
     {
-        //Deletes singleton copies that may spawn durring the game
+        //Deletes other singleton copies that may spawn durring the game
         if (_instance != null)
         {
             //If gameObject has the same name as the class then it is assumed the object exists for the class and should be destroyed

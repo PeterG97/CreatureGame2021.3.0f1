@@ -1,13 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
-using UnityEngine.SceneManagement;
+/* This class is meant to always exist and if it doesn't an instance of it will be instantiated
+ * because of the behavior inherited from the PermanentMonoSingleton parent class (Found in my CustomMethods).
+ * It is meant to handle fundamental functions such as saving and loading to files (not implemented).
+ * Instances of this class persist through scenes. Allowing information to be transferred through
+ * scenes with this class.
+ * 
+ * Dependent on no classes */
 
 #region ---=== TODO ===---
 /* Plant abilities
  * Adjust depth sorting for outline (either add basic offset to help a little or track line width in script)
  * Plant wind shader stutter
+ * Add more descriptions
  * 
  * Feature creep:
  * Add attack animation between fighting animals for clarity
@@ -17,10 +20,14 @@ using UnityEngine.SceneManagement;
  * Implement better age & reproduction timer spawing (some animals spawn near death) */
 #endregion
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public class GameManager : PermanentMonoSingleton<GameManager>
 {
-    /* Dependent on no Classes */
-
     #region ---=== Serialized Variables ===---
     //Reference to scriptable object which will be copied for runtime instance
     [SerializeField] private GameValues gameValuesBase;

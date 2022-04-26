@@ -1,7 +1,16 @@
+/* Contains individualized plant data and basic functions such as growth, decaying, and death.
+ * Plants increase their nutrition every FixedUpdate based on their growth rate and only die if
+ * an animal eats all of their nutrition at once, their HP drops to <= 0, or from old age. They
+ * also attempt to reproduce on a timer but if no open spaces are around them they fail.
+ * 
+ * Dependent on classes:
+ * PermanentMonoSingleton - GameManager
+ * MonoSingleton - LifeformManager */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class Plant : SimulatedLifeform
 {
@@ -112,7 +121,7 @@ public class Plant : SimulatedLifeform
             return;
 
         dead = true;
-        Nutrition = 1;
+        Resize();
 
         if (LifeformManager.Instance != null)
             LifeformManager.Instance.PlantPopulation--;
@@ -124,6 +133,8 @@ public class Plant : SimulatedLifeform
     {
         transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.01f);
         sprite.color = Color.Lerp(sprite.color, Color.black, 0.01f);
+        nutrition -= maxNutrition * 0.01f;
+        nutrition = Mathf.Clamp(nutrition, 1, maxNutrition);
 
         if (transform.localScale.x < 0.05f)
         {

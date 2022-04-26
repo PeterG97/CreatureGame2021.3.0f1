@@ -1,5 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+/* A class that is inherited by all life forms including the playing and only has the most basic
+ * shared values and functions. This class it mainly used to identify living beings within the game.
+ * 
+ * Dependent on no classes */
+
 using UnityEngine;
 
 public class Lifeform : MonoBehaviour
