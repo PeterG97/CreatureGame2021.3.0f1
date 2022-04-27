@@ -14,7 +14,7 @@ Assets / Meta / Managers / Scripts / LifeformManager.cs
 Assets / Lifeforms / Animals / Scripts / Animal.cs
 - Contains the extensive animal code
 
-Google Drive link for latest build:
+Google Drive link for latest Windows build:
 
 Zipped: https://drive.google.com/file/d/1eoYmm5jvw0Lp62EvQ_p5o9DKpJnYeEY7/view?usp=sharing
 
