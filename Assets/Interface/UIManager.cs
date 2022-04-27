@@ -27,6 +27,7 @@ public class UIManager : MonoSingleton<UIManager>
     [NonSerialized] private RectTransform optionsMenuTransform;
     [NonSerialized] private RectTransform performanceMenuTransform;
     [NonSerialized] private RectTransform animalInfoMenuTransform;
+    [NonSerialized] private new Camera camera;
 
     //Options Menu UI
     [NonSerialized] public Toggle plantTimerToggle, animalTimerToggle;
@@ -68,6 +69,8 @@ public class UIManager : MonoSingleton<UIManager>
 
     private void Start()
     {
+        camera = Camera.main;
+
         SetUpUI();
         UpdateAllUI();
         Invoke("DelayedMeasurements", 0.01f);
@@ -129,7 +132,7 @@ public class UIManager : MonoSingleton<UIManager>
     private void MouseOver()
     {
         Vector2 mousePosition = interfaceInput.UI.Point.ReadValue<Vector2>();
-        Vector2 position = Camera.main.ScreenToWorldPoint(mousePosition);
+        Vector2 position = camera.ScreenToWorldPoint(mousePosition);
 
         int hits = Physics2D.OverlapPoint(position, mouseFilter, mouseRay);
         if (hits > 0)

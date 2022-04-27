@@ -15,7 +15,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1465858543059646628
 Transform:
@@ -99,7 +99,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &4318869470388744051
 Transform:
@@ -144,7 +144,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!224 &3235075715015735171
 RectTransform:
@@ -210,11 +210,12 @@ MonoBehaviour:
   generations: 0
   size: 1
   color: {r: 0, g: 0, b: 0, a: 0}
-  maxNutrition: 100
-  nutrition: 100
+  age: 0
   maxAge: 5
   deathAge: 5
-  age: 0
+  maxNutrition: 100
+  nutrition: 100
+  dead: 0
   plantIndex: -1
   gridLocation: {x: 0, y: 0}
   growRate: 1

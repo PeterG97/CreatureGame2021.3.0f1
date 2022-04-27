@@ -1,7 +1,7 @@
 /* Contains the functions to create and initialize plants and animals and stores references to
  * various assets used for setting up lifeforms. Lifeforms can be spawned using the
  * SpawnNewPlant/Animal methods. After spawning, lifeforms need to either be sent to the Randomize
- * methods or have their base values directly set. RandomizePlant/Animal chooses all of their
+ * methods or have their base values directly set. RandomizeLifeform chooses all of their
  * values based on the potential starting ranges defined by the Lifeform Values scriptable object
  * which acts as a central definition of lifeform properties. After a lifeform has its base traits
  * setup or changed it needs to be updated in the UpdatePlant/Animal methods which updates the
@@ -168,7 +168,9 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         return newAnimal.GetComponent<Animal>();
     }
 
-    public void RandomizePlant(Plant _plant)
+
+    #region ---=== Randomize Lifeforms ===---
+    public void RandomizeLifeform(Plant _plant)
     {
         //Age
         _plant.maxAge = LifeformValues.PlantMaxAge * UnityEngine.Random.Range(1 - LifeformValues.AgeVariation, 1 + LifeformValues.AgeVariation);
@@ -185,10 +187,10 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         //Abilities
 
-        UpdatePlant(_plant);
+        UpdateLifeform(_plant);
     }
 
-    public void RandomizeAnimal(Animal _animal)
+    public void RandomizeLifeform(Animal _animal)
     {
         //Age
         _animal.maxAge = LifeformValues.AnimalMaxAge * UnityEngine.Random.Range(1 - LifeformValues.AgeVariation, 1 + LifeformValues.AgeVariation);
@@ -226,9 +228,110 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _animal.reproductionNegatives = UnityEngine.Random.Range(LifeformValues.AnimalReproductionNegativesMin, LifeformValues.AnimalReproductionNegativesMax);
         _animal.reproductionWaitTime = LifeformValues.AnimalReproductionTimePercent * _animal.maxAge * _animal.reproductionNegatives;
 
-        UpdateAnimal(_animal);
+        UpdateLifeform(_animal);
+    }
+    #endregion
+
+
+    #region ---=== Update Lifeforms ===---
+    public void UpdateLifeform(Plant _plant)
+    {
+        //Age
+        _plant.deathAge = _plant.maxAge;
+
+        //Nutrition
+        _plant.maxNutrition = LifeformValues.PlantBaseMaxNutrition * Mathf.Pow(_plant.size, LifeformValues.NutritionPower);
+        _plant.Nutrition = UnityEngine.Random.Range(_plant.maxNutrition * LifeformValues.PlantStartingNutritionMin,
+                                        _plant.maxNutrition * LifeformValues.PlantStartingNutritionMax);
+
+        //Body
+        _plant.transform.localScale = new Vector3(_plant.size, _plant.size, _plant.transform.localScale.z);
+        SpriteRenderer spriteRenderer = _plant.transform.Find("Sprites").Find("MainSprite").GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = plantSprites[_plant.plantIndex];
+        spriteRenderer.color = _plant.color;
+        if (UnityEngine.Random.value < 0.5f) //50% chance to flip sprite
+            spriteRenderer.transform.localScale = new Vector3(spriteRenderer.transform.localScale.x * -1,
+                                                              spriteRenderer.transform.localScale.y,
+                                                              spriteRenderer.transform.localScale.z);
+
+        //Derived Stats
+        _plant.maxHitPoints = Mathf.CeilToInt(LifeformValues.PlantBaseHP * Mathf.Pow(_plant.size, LifeformValues.HpPower));
+        _plant.HitPoints = _plant.maxHitPoints;
+
+        _plant.growRate = LifeformValues.PlantBaseGrowRate * Mathf.Pow(_plant.size, LifeformValues.NutritionChangeRatePower);
+
+        //Abilities
+        //TODO
+        //Depends on abilities
+        /*
+        _plant.growRate = (plantBaseGrowRate * Mathf.Pow(_plant.size, nutritionChangeRatePower))
+                                * (0.5f * _animal.sight + 0.5f) //Sight has a scaling linear relationship 0.5x + 0.5 (1 Sight = 1 hunger)
+                                * (0.1f * _animal.attackPower + 0.8f); //Attack has a scaling linear relationship 0.1x + 0.8 (2 Attack = 1 hunger)
+        */
+
+        _plant.reproductionTimer = 1f;
+        _plant.Resize();
     }
 
+    public void UpdateLifeform(Animal _animal)
+    {
+        //Updates all animal information based on current variabled and resets to a starting state
+
+        //Age
+        _animal.deathAge = _animal.maxAge;
+        _animal.adultAge = LifeformValues.AnimalAdultAgePercent * _animal.maxAge;
+
+        //Nutrition
+        _animal.maxNutrition = LifeformValues.AnimalsBaseMaxNutrition * Mathf.Pow(_animal.size, LifeformValues.NutritionPower);
+
+        //Body
+        _animal.transform.localScale = new Vector3(_animal.size, _animal.size, _animal.transform.localScale.z);
+        _animal.transform.position = new Vector3(_animal.transform.position.x, _animal.transform.position.y, -(_animal.transform.localScale.y - 1) / 2);
+        SetAnimalBody(_animal, _animal.bodyIndex, _animal.color);
+        SetAnimalEye(_animal, _animal.eyeIndex);
+        SetAnimalMouth(_animal, _animal.mouthIndex);
+        _animal.slimeParticles.startColor = _animal.color;
+
+        //Derived Stats
+        _animal.maxHitPoints = Mathf.CeilToInt(LifeformValues.AnimalsBaseHP * Mathf.Pow(_animal.size, LifeformValues.HpPower));
+        _animal.HitPoints = _animal.maxHitPoints;
+
+        _animal.moveSpeed = LifeformValues.AnimalsBaseMoveSpeed * Mathf.Pow(_animal.size, LifeformValues.MoveSpeedPower);
+        _animal.wanderTimerMax = _animal.size * 3f;
+        _animal.reproductionWaitTime = LifeformValues.AnimalReproductionTimePercent * _animal.maxAge * _animal.reproductionNegatives;
+
+        //Abilities (increase hungerRate)
+        _animal.hungerRate = (LifeformValues.AnimalsBaseHungerRate * Mathf.Pow(_animal.size, LifeformValues.NutritionChangeRatePower))
+                        * (0.5f * MathF.Pow(_animal.sight, 3) + 0.5f) //Sight has an exponential relationship 0.5x^3 + 0.5 (1 = 1 hunger)
+                        * (0.1f * MathF.Pow(_animal.attackPower, 2) + 0.8f) //Attack has an exponential relationship 0.1x^2 + 0.8 (2 = 1 hunger)
+                        * (1000f * MathF.Pow(_animal.hitPointsRegenSpeed, 2) + 1f) //HP Regen has an exponential relationship 1000x^2 + 1 (0 = 1 hunger, 0.02 = 1.4 hunger)
+                        * (-MathF.Pow(_animal.reproductionNegatives, 3) / 10f + 1f); //Reproduction Negatives has an exponential relationship -x^3/10 + 1 (0 = 1 hunger, 1 = 0.9, 2.15 = 0)
+
+        //Modified based on sight
+        _animal.GetComponent<CircleCollider2D>().radius = LifeformValues.AnimalsBaseSightRadius * _animal.sight * _animal.size;
+
+
+        _animal.sprites.localPosition = Vector3.zero;
+
+        //Set child stats
+        if (!_animal.adult)
+        {
+            AnimalMultiplyAgeStats(_animal, LifeformValues.AnimalChildStatMult);
+            _animal.ResizeChild();
+        }
+
+        //Calculated after baby check because it changes maxNutrition
+        _animal.Nutrition = UnityEngine.Random.Range(_animal.maxNutrition * LifeformValues.AnimalStartingNutritionMin,
+                                                     _animal.maxNutrition * LifeformValues.AnimalStartingNutritionMax);
+
+        //Reset control important variables
+        _animal.Action = AnimalAction.Idle;
+        _animal.reproductionTimer = _animal.reproductionWaitTime;
+    }
+    #endregion
+
+
+    #region ---=== Reproduction ===---
     public Animal AnimalSexualReproduction(Animal _animal1, Animal _animal2)
     {
         Animal _baby = SpawnNewAnimal(_animal1.transform.position);
@@ -349,7 +452,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         //Update Baby
         _baby.adult = false;
-        UpdateAnimal(_baby);
+        UpdateLifeform(_baby);
         _baby.Nutrition = _baby.maxNutrition / 2;
         _baby.parents.Add(_animal1);
         _baby.parents.Add(_animal2);
@@ -443,7 +546,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         //Update Baby
         _baby.adult = false;
-        UpdateAnimal(_baby);
+        UpdateLifeform(_baby);
         _baby.Nutrition = _baby.maxNutrition / 2;
         _baby.parents.Add(_animal);
 
@@ -501,7 +604,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         //_baby.sight = UnityEngine.Random.Range(_plant.sight * variationMult, _plant.sight / variationMult);
 
         //Update Baby
-        UpdatePlant(_baby);
+        UpdateLifeform(_baby);
         _baby.Nutrition = _baby.maxNutrition * LifeformValues.BabyPlantStartingNutrition;
         _baby.Resize();
 
@@ -510,101 +613,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         return _baby;
     }
+    #endregion
 
-    public void UpdatePlant(Plant _plant)
-    {
-        //Age
-        _plant.deathAge = _plant.maxAge;
-
-        //Nutrition
-        _plant.maxNutrition = LifeformValues.PlantBaseMaxNutrition * Mathf.Pow(_plant.size, LifeformValues.NutritionPower);
-        _plant.Nutrition = UnityEngine.Random.Range(_plant.maxNutrition * LifeformValues.PlantStartingNutritionMin,
-                                        _plant.maxNutrition * LifeformValues.PlantStartingNutritionMax);
-
-        //Body
-        _plant.transform.localScale = new Vector3(_plant.size, _plant.size, _plant.transform.localScale.z);
-        SpriteRenderer spriteRenderer = _plant.transform.Find("Sprites").Find("MainSprite").GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = plantSprites[_plant.plantIndex];
-        spriteRenderer.color = _plant.color;
-        if (UnityEngine.Random.value < 0.5f) //50% chance to flip sprite
-        spriteRenderer.transform.localScale = new Vector3(spriteRenderer.transform.localScale.x * -1,
-                                                          spriteRenderer.transform.localScale.y,
-                                                          spriteRenderer.transform.localScale.z);
-
-        //Derived Stats
-        _plant.maxHitPoints = Mathf.CeilToInt(LifeformValues.PlantBaseHP * Mathf.Pow(_plant.size, LifeformValues.HpPower));
-        _plant.HitPoints = _plant.maxHitPoints;
-
-        _plant.growRate = LifeformValues.PlantBaseGrowRate * Mathf.Pow(_plant.size, LifeformValues.NutritionChangeRatePower);
-
-        //Abilities
-        //TODO
-        //Depends on abilities
-        /*
-        _plant.growRate = (plantBaseGrowRate * Mathf.Pow(_plant.size, nutritionChangeRatePower))
-                                * (0.5f * _animal.sight + 0.5f) //Sight has a scaling linear relationship 0.5x + 0.5 (1 Sight = 1 hunger)
-                                * (0.1f * _animal.attackPower + 0.8f); //Attack has a scaling linear relationship 0.1x + 0.8 (2 Attack = 1 hunger)
-        */
-
-        _plant.reproductionTimer = 1f;
-        _plant.Resize();
-    }
-
-    public void UpdateAnimal(Animal _animal)
-    {
-        //Updates all animal information based on current variabled and resets to a starting state
-
-        //Age
-        _animal.deathAge = _animal.maxAge;
-        _animal.adultAge = LifeformValues.AnimalAdultAgePercent * _animal.maxAge;
-
-        //Nutrition
-        _animal.maxNutrition = LifeformValues.AnimalsBaseMaxNutrition * Mathf.Pow(_animal.size, LifeformValues.NutritionPower);
-
-        //Body
-        _animal.transform.localScale = new Vector3(_animal.size, _animal.size, _animal.transform.localScale.z);
-        _animal.transform.position = new Vector3(_animal.transform.position.x, _animal.transform.position.y, -(_animal.transform.localScale.y - 1) / 2);
-        SetAnimalBody(_animal, _animal.bodyIndex, _animal.color);
-        SetAnimalEye(_animal, _animal.eyeIndex);
-        SetAnimalMouth(_animal, _animal.mouthIndex);
-        _animal.slimeParticles.startColor = _animal.color;
-
-        //Derived Stats
-        _animal.maxHitPoints = Mathf.CeilToInt(LifeformValues.AnimalsBaseHP * Mathf.Pow(_animal.size, LifeformValues.HpPower));
-        _animal.HitPoints = _animal.maxHitPoints;
-
-        _animal.moveSpeed = LifeformValues.AnimalsBaseMoveSpeed * Mathf.Pow(_animal.size, LifeformValues.MoveSpeedPower);
-        _animal.wanderTimerMax = _animal.size * 3f;
-        _animal.reproductionWaitTime = LifeformValues.AnimalReproductionTimePercent * _animal.maxAge * _animal.reproductionNegatives;
-
-        //Abilities (increase hungerRate)
-        _animal.hungerRate = (LifeformValues.AnimalsBaseHungerRate * Mathf.Pow(_animal.size, LifeformValues.NutritionChangeRatePower))
-                        * (0.5f * MathF.Pow(_animal.sight, 3) + 0.5f) //Sight has an exponential relationship 0.5x^3 + 0.5 (1 = 1 hunger)
-                        * (0.1f * MathF.Pow(_animal.attackPower, 2) + 0.8f) //Attack has an exponential relationship 0.1x^2 + 0.8 (2 = 1 hunger)
-                        * (1000f * MathF.Pow(_animal.hitPointsRegenSpeed, 2) + 1f) //HP Regen has an exponential relationship 1000x^2 + 1 (0 = 1 hunger, 0.02 = 1.4 hunger)
-                        * (-MathF.Pow(_animal.reproductionNegatives, 3)/10f + 1f); //Reproduction Negatives has an exponential relationship -x^3/10 + 1 (0 = 1 hunger, 1 = 0.9, 2.15 = 0)
-
-        //Modified based on sight
-        _animal.GetComponent<CircleCollider2D>().radius = LifeformValues.AnimalsBaseSightRadius * _animal.sight * _animal.size;
-
-
-        _animal.sprites.localPosition = Vector3.zero;
-
-        //Set child stats
-        if (!_animal.adult)
-        {
-            AnimalMultiplyAgeStats(_animal, LifeformValues.AnimalChildStatMult);
-            _animal.ResizeChild();
-        }
-
-        //Calculated after baby check because it changes maxNutrition
-        _animal.Nutrition = UnityEngine.Random.Range(_animal.maxNutrition * LifeformValues.AnimalStartingNutritionMin,
-                                                     _animal.maxNutrition * LifeformValues.AnimalStartingNutritionMax);
-
-        //Reset control important variables
-        _animal.Action = AnimalAction.Idle;
-        _animal.reproductionTimer = _animal.reproductionWaitTime;
-    }
 
     public float CalcColorSimilarity(Color _firstColor, Color _secondColor)
     {

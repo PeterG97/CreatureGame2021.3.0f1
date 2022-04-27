@@ -33,6 +33,7 @@ public class Plant : SimulatedLifeform
 
     #region ---=== Nonserialized Variables ===---
     [NonSerialized] public SpriteRenderer sprite;
+    [NonSerialized] private Transform tform;
 
     [NonSerialized] private float sortZOffset = 0.2f; //TODO temp fix
 
@@ -46,7 +47,8 @@ public class Plant : SimulatedLifeform
 
     private void Awake()
     {
-        sprite = transform.GetChild(0).GetComponentInChildren<SpriteRenderer>();
+        tform = transform;
+        sprite = tform.GetChild(0).GetComponentInChildren<SpriteRenderer>();
     }
 
     protected override void FixedUpdate()
@@ -94,16 +96,16 @@ public class Plant : SimulatedLifeform
         float remainingSize = Nutrition / maxNutrition;
         if (remainingSize < 0.15f)
             remainingSize = 0.15f;
-        transform.localScale = new Vector3(size * remainingSize, size * remainingSize, transform.localScale.z);
+        tform.localScale = new Vector3(size * remainingSize, size * remainingSize, tform.localScale.z);
 
         //Fixes YZ depth sorting for scaled objects
-        transform.position = new Vector3(transform.position.x, transform.position.y, -(transform.localScale.y - 1)/2 + sortZOffset);
+        tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1)/2 + sortZOffset);
     }
 
     public void Randomize()
     {
         if (!dead)
-            LifeformManager.Instance.RandomizePlant(this);
+            LifeformManager.Instance.RandomizeLifeform(this);
     }
 
     public void AfterReproduce(float _deathAgeLost)
@@ -131,12 +133,12 @@ public class Plant : SimulatedLifeform
 
     public void Decaying()
     {
-        transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.01f);
+        tform.localScale = Vector3.Lerp(tform.localScale, Vector3.zero, 0.01f);
         sprite.color = Color.Lerp(sprite.color, Color.black, 0.01f);
         nutrition -= maxNutrition * 0.01f;
         nutrition = Mathf.Clamp(nutrition, 1, maxNutrition);
 
-        if (transform.localScale.x < 0.05f)
+        if (tform.localScale.x < 0.05f)
         {
             Destroy(gameObject);
         }

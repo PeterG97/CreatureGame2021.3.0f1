@@ -57,7 +57,6 @@ public class Animal : SimulatedLifeform
     [SerializeField] private List<GameObject> detectionList = new List<GameObject>(); //All objects seen since start of detection cooldown
 
     [Header("Timers")] //All count down to 0 or less which permits some action
-    [SerializeField] private float wanderTimer; //How long an idle animal will walk in one direction
     [SerializeField] private float detectionTimer ; //Time in between checking for new attackTarget
     [SerializeField] private float timeOutTimer = 10f; //Stops action if its taking more than this time
     [SerializeField] private float actionTimer; //Time until able to perform direct interactions such as attacking or eating
@@ -74,6 +73,7 @@ public class Animal : SimulatedLifeform
     [NonSerialized] public Collider2D sightCollider;
     [NonSerialized] public ParticleSystem.MainModule slimeParticles;
     [NonSerialized] private Material bodyMaterial;
+    [NonSerialized] private Transform tform;
     [NonSerialized] public Transform sprites;
 
     //Constant values
@@ -162,7 +162,7 @@ public class Animal : SimulatedLifeform
             {
                 //Just set to idle from other action
                 if (action != AnimalAction.Idle)
-                    wanderTimer = 0; //To make sure that a new position is set
+                    actionTimer = 0; //To make sure that a new position is set
                 target = null;
             }
 
@@ -177,17 +177,18 @@ public class Animal : SimulatedLifeform
     {
         rigidBody = GetComponent<Rigidbody2D>();
         sightCollider = GetComponent<CircleCollider2D>();
-        sprites = transform.Find("Sprites");
+        tform = transform;
+        sprites = tform.Find("Sprites");
 
         detectionTimer = UnityEngine.Random.Range(0, 1f); //Makes sure many new spawns don't all check their detection collision at the same time
         Action = AnimalAction.Idle; //Default and resets the timeOutTimer
-        slimeParticles = transform.GetComponentInChildren<ParticleSystem>().main;
+        slimeParticles = tform.GetComponentInChildren<ParticleSystem>().main;
     }
 
     void Start()
     {
         interactDistance = GameManager.Instance.GameValues.GameCellSize;
-        bodyMaterial = transform.Find("Sprites").Find("BodySprite").GetComponent<Renderer>().material;
+        bodyMaterial = tform.Find("Sprites").Find("BodySprite").GetComponent<Renderer>().material;
     }
 
     protected override void FixedUpdate()
@@ -258,10 +259,9 @@ public class Animal : SimulatedLifeform
         switch (Action)
         {
             case AnimalAction.Idle:
-                wanderTimer -= Time.deltaTime;
-                if (wanderTimer <= 0) //Pick new wanderPos
+                if (actionTimer <= 0) //Pick new wanderPos
                 {
-                    wanderTimer = wanderTimerMax;
+                    actionTimer = wanderTimerMax;
                     wanderPos = new Vector2(rigidBody.position.x + UnityEngine.Random.Range(-100, 100),
                                             rigidBody.position.y + UnityEngine.Random.Range(-100, 100));
                 }
@@ -392,7 +392,7 @@ public class Animal : SimulatedLifeform
         {
             stunEffectTimer = stunEffectTimerMax;
 
-            GameManager.Instance.PlayStunParticle(transform.position, transform.localScale.x);
+            GameManager.Instance.PlayStunParticle(tform.position, tform.localScale.x);
         }
     }
 
@@ -749,13 +749,13 @@ public class Animal : SimulatedLifeform
     {
         if (_animal == null && CanReproduce(sexualReproduction))
         {
-            GameManager.Instance.PlayAnimalReproduceParticle(transform.position, transform.localScale.x);
+            GameManager.Instance.PlayAnimalReproduceParticle(tform.position, tform.localScale.x);
             LifeformManager.Instance.AnimalAsexualReproduction(this);
             return true;
         }
         else if (CanReproduce(sexualReproduction) && _animal.CanReproduce(sexualReproduction))
         {
-            GameManager.Instance.PlayAnimalReproduceParticle(transform.position, transform.localScale.x);
+            GameManager.Instance.PlayAnimalReproduceParticle(tform.position, tform.localScale.x);
             LifeformManager.Instance.AnimalSexualReproduction(this, _animal);
             return true;
         }
@@ -844,7 +844,7 @@ public class Animal : SimulatedLifeform
         Nutrition = 0; //Needed if they die from other reasons
         DecomposeTimer = maxNutrition;
 
-        GameManager.Instance.PlayAnimalDeathParticle(transform.position, transform.localScale.x);
+        GameManager.Instance.PlayAnimalDeathParticle(tform.position, tform.localScale.x);
 
         //Turn off effects and collider
         sightCollider.enabled = false;
@@ -853,7 +853,7 @@ public class Animal : SimulatedLifeform
 
         //Update Sprite
         sprites.localScale = new Vector3(1, -1, 1); //Resets other changes too
-        size = transform.localScale.x;
+        size = tform.localScale.x;
     }
 
     public void GrowUp()
@@ -863,7 +863,7 @@ public class Animal : SimulatedLifeform
 
         age = adultAge;//Age will create a loop
         adult = true;
-        GameManager.Instance.PlayAnimalGrowUpParticle(transform.position, transform.localScale.x);
+        GameManager.Instance.PlayAnimalGrowUpParticle(tform.position, tform.localScale.x);
         LifeformManager.Instance.AnimalMultiplyAgeStats(this, 1 / LifeformValues.AnimalChildStatMult);
     }
 
@@ -872,10 +872,10 @@ public class Animal : SimulatedLifeform
         resizeTimer = resizeTimerMax;
 
         float newSize = 0.5f/(adultAge / maxAge) * (Age / maxAge) + 0.5f;
-        transform.localScale = new Vector3(size * newSize, size * newSize, transform.localScale.z);
+        tform.localScale = new Vector3(size * newSize, size * newSize, tform.localScale.z);
 
         //Fixes YZ depth sorting for scaled objects
-        transform.position = new Vector3(transform.position.x, transform.position.y, -(transform.localScale.y - 1) / 2);
+        tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1) / 2);
     }
 
     public void ResizeCorpse()
@@ -885,10 +885,10 @@ public class Animal : SimulatedLifeform
         float remainingSize = decomposeTimer / maxNutrition;
         if (remainingSize < 0.15f)
             remainingSize = 0.15f;
-        transform.localScale = new Vector3(size * remainingSize, size * remainingSize, transform.localScale.z);
+        tform.localScale = new Vector3(size * remainingSize, size * remainingSize, tform.localScale.z);
 
         //Fixes YZ depth sorting for scaled objects
-        transform.position = new Vector3(transform.position.x, transform.position.y, -(transform.localScale.y - 1) / 2);
+        tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1) / 2);
     }
 
     public void AfterReproduce(float _nutritionLost, float _deathAgeLost)
@@ -910,7 +910,7 @@ public class Animal : SimulatedLifeform
         if (dead)
             return;
 
-        LifeformManager.Instance.RandomizeAnimal(this);
+        LifeformManager.Instance.RandomizeLifeform(this);
     }
 
     public void UpdateProperties()
@@ -918,7 +918,7 @@ public class Animal : SimulatedLifeform
         if (dead)
             return;
         
-        LifeformManager.Instance.UpdateAnimal(this);
+        LifeformManager.Instance.UpdateLifeform(this);
     }
 
     public void SetStun(float _time)

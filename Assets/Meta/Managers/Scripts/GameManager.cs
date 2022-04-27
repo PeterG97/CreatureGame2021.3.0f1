@@ -11,6 +11,10 @@
  * Adjust depth sorting for outline (either add basic offset to help a little or track line width in script)
  * Plant wind shader stutter
  * Add more descriptions
+ * Replace FindObjectsOfType with FindObjectsWithTag performs way better
+ * Implement StringBuilder performs better
+ * Foreach for for loops that access index of array more than once
+ * Order more complex data types after others (vector * float is worse than float * vector) same is true for int and float
  * 
  * Feature creep:
  * Add attack animation between fighting animals for clarity
