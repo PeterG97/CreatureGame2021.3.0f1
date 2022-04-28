@@ -194,7 +194,7 @@ public class UIManager : MonoSingleton<UIManager>
         sizeText.text = _animal.size.ToString("F2");
 
         //Abilities
-        hpRegenText.text = _animal.hitPointsRegenSpeed.ToString("F2");
+        hpRegenText.text = _animal.hitPointsRegenSpeed.ToString("F3");
         attackText.text = _animal.attackPower.ToString("F0");
         sightText.text = _animal.sight.ToString("F0");
 

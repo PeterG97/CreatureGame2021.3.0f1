@@ -199,11 +199,11 @@ public class MapManager : MonoSingleton<MapManager>
     private void DestoryAllLife()
     {
         //Destroy all plants and animals that currently exist
-        foreach (Plant plant in FindObjectsOfType<Plant>())
-            Destroy(plant.gameObject);
+        foreach (GameObject plant in GameObject.FindGameObjectsWithTag("Plant"))
+            Destroy(plant);
 
-        foreach (Animal animal in FindObjectsOfType<Animal>())
-            Destroy(animal.gameObject);
+        foreach (GameObject animal in GameObject.FindGameObjectsWithTag("Animal"))
+            Destroy(animal);
     }
 
     public Vector2Int SpawnLifeRandomCell(bool _plant)

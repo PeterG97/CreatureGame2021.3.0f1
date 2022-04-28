@@ -5063,7 +5063,7 @@ GameObject:
   - component: {fileID: 6413443394143731636}
   m_Layer: 0
   m_Name: AnimalPrefab
-  m_TagString: Untagged
+  m_TagString: Animal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5112,6 +5112,7 @@ MonoBehaviour:
   deathAge: 5
   maxNutrition: 10000
   nutrition: 10000
+  dead: 0
   bodyIndex: 0
   eyeIndex: 0
   mouthIndex: 0
@@ -5132,11 +5133,14 @@ MonoBehaviour:
   reproductionNegatives: 10
   sexualReproduction: 1
   parents: []
-  dead: 0
   action: 0
+  target:
+    obj: {fileID: 0}
+    type: 0
+    plant: {fileID: 0}
+    animal: {fileID: 0}
   wanderPos: {x: 0, y: 0}
   detectionList: []
-  wanderTimer: 0.1
   detectionTimer: 0.1
   timeOutTimer: 10
   actionTimer: 0.1

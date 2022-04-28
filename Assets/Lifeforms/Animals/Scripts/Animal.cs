@@ -308,17 +308,19 @@ public class Animal : SimulatedLifeform
                     break;
                 actionTimer = 0.1f; //Buffer in between raycasts
 
-                RaycastHit2D[] attackResults = Physics2D.RaycastAll(rigidBody.position, attackDirection, interactDistance * size);
-                for (int i = 0; i < attackResults.Length; i++)
+                RaycastHit2D[] attackHits = Physics2D.RaycastAll(rigidBody.position, attackDirection, interactDistance * size);
+                foreach (RaycastHit2D hit in attackHits)
                 {
-                    if (!(attackResults[i].collider is CircleCollider2D) &&
-                        (attackResults[i].transform.gameObject == target.obj //If it is intended target or other valid target
-                        || CheckOffensiveAttack(new LifeformObject(attackResults[i].transform.gameObject, LifeformType.Animal))))
+                    //Valid hit if not a trigger collider and is target
+                    //removed because they fequently check for the closest target so this probably is overkill "|| CheckOffensiveAttack(new LifeformObject(hit.transform.gameObject, LifeformType.Animal))"
+                    if (!hit.collider.isTrigger
+                        && (hit.transform.gameObject == target.obj))
                     {
                         HitAnimal(target.animal);
                         break;
                     }
                 }
+
                 break;
 
             case AnimalAction.Eat:
@@ -336,10 +338,10 @@ public class Animal : SimulatedLifeform
                     break;
                 actionTimer = 0.1f; //Buffer in between raycasts
 
-                RaycastHit2D[] eatResults = Physics2D.RaycastAll(rigidBody.position, eatDirection, interactDistance * size);
-                for (int i = 0; i < eatResults.Length; i++)
+                RaycastHit2D[] eatHits = Physics2D.RaycastAll(rigidBody.position, eatDirection, interactDistance * size);
+                for (int i = 0; i < eatHits.Length; i++)
                 {
-                    if (eatResults[i].transform.gameObject == target.obj)
+                    if (eatHits[i].transform.gameObject == target.obj)
                     {
                         EatFood(target);
                         break;
@@ -364,11 +366,10 @@ public class Animal : SimulatedLifeform
 
                 if (sexualReproduction)
                 {
-                    RaycastHit2D[] reproduceResults = Physics2D.RaycastAll(rigidBody.position, reproduceDirection, interactDistance * size);
-                    for (int i = 0; i < reproduceResults.Length; i++)
+                    RaycastHit2D[] reproduceHits = Physics2D.RaycastAll(rigidBody.position, reproduceDirection, interactDistance * size);
+                    foreach (RaycastHit2D hit in reproduceHits)
                     {
-                        if (!(reproduceResults[i].collider is CircleCollider2D) &&
-                            reproduceResults[i].transform.gameObject == target.obj)
+                        if (!hit.collider.isTrigger && hit.transform.gameObject == target.obj)
                         {
                             Reproduce(target.animal);
                             break;
@@ -398,9 +399,8 @@ public class Animal : SimulatedLifeform
 
     private Vector2 MoveTowardsPosition(Vector2 _targetPos)
     {
-        Vector2 thisPos = new(rigidBody.position.x, rigidBody.position.y);
-        Vector2 direction = (_targetPos - thisPos).normalized;
-        rigidBody.velocity = direction * moveSpeed * Time.deltaTime;
+        Vector2 direction = (_targetPos - rigidBody.position).normalized;
+        rigidBody.velocity = moveSpeed * Time.deltaTime * direction;
 
         return direction; //Used for interaction
     }
@@ -599,10 +599,10 @@ public class Animal : SimulatedLifeform
 
         //Reasons to run
         //1 - antisocial
-        //2 - fearful & being targetted
+        //2 - Fearful & being targetted
         //3 - hp too low and potential target is able to attack
         if (social == AnimalSocial.Antisocial
-            || (targetAnimal.target != null && targetAnimal.target.obj == gameObject && nature == AnimalNature.Fearful)
+            || (nature == AnimalNature.Fearful && targetAnimal.target != null && targetAnimal.target.obj == gameObject && targetAnimal.Action == AnimalAction.Attack)
             || (HitPoints / maxHitPoints < hpRunThreshold && (targetAnimal.diet != AnimalDiet.Herbivore || targetAnimal.nature == AnimalNature.Violent)))
         {
             if (Action != AnimalAction.Run) //Override everything else
@@ -683,6 +683,10 @@ public class Animal : SimulatedLifeform
     #region ---=== Direct Interactions With Other Lifeform ===---
     private void HitAnimal(Animal _animal)
     {
+        //TODO Remove
+        if (_animal == this)
+            print("ERROR - HIT SELF");
+
         actionTimer = actionTimerMax;
 
         GameManager.Instance.PlayAnimalHitParticle(_animal.transform.position, _animal.transform.localScale.x);

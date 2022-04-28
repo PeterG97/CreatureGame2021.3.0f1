@@ -53,6 +53,10 @@ MonoBehaviour:
   - {fileID: 3286163911610860551, guid: d3cbf537d91e39543809b7c1d210fc48, type: 3}
   - {fileID: 3286163911610860551, guid: 897205321f4d41141b24401eb174976b, type: 3}
   - {fileID: 3286163911610860551, guid: 15fc1c840f54f15449834d24dd3b2b2d, type: 3}
+  - {fileID: 3286163911610860551, guid: 8911b36757aa454499e3a6060b1c7c05, type: 3}
+  - {fileID: 3286163911610860551, guid: 3cbe9f164d95299468a1dbcbb68158a8, type: 3}
+  - {fileID: 3286163911610860551, guid: 2b2acd30053b7f64aac41a8cd379df9d, type: 3}
+  - {fileID: 3286163911610860551, guid: 00bac851609f09240a42339fc565f287, type: 3}
   bodySprites:
   - {fileID: 3286163911610860551, guid: 5d7d18ba90f06614182f137e9b4514cf, type: 3}
   - {fileID: 3286163911610860551, guid: 7b5dc121e52ba1546a81a9d6e2beff92, type: 3}
@@ -106,4 +110,3 @@ MonoBehaviour:
   - {fileID: -1674116814, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
   - {fileID: 426309749, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
   - {fileID: 2086973587, guid: 77b83a90357f0b14995b0d5ae4efdb91, type: 3}
-  minColorValue: 0.7

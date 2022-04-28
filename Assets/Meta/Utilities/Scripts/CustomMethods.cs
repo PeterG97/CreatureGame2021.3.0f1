@@ -59,18 +59,18 @@ public static class CheckNull
                 string[] parents = parentsListClass.parents;
 
                 GameObject lastParent = null;
-                for (int i = 0; i < parents.Length; i++)
+                foreach (var parent in parents)
                 {
-                    GameObject thisParent = GameObject.Find(parents[i]);
+                    GameObject thisParent = GameObject.Find(parent);
                     if (thisParent == null)
-                        thisParent = new GameObject(parents[i]);
+                        thisParent = new GameObject(parent);
 
                     if (lastParent != null)
                         thisParent.transform.SetParent(lastParent.transform);
 
                     lastParent = thisParent;
 
-                    if (i == parents.Length - 1) //End of loop
+                    if (parent == parents[^1]) //End of loop
                     {
                         _argument.transform.SetParent(lastParent.transform);
                     }

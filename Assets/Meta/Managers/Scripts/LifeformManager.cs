@@ -708,7 +708,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     #endregion
 }
 
-[SerializeField]
+[Serializable]
 public class LifeformObject
 {
     public GameObject obj;
