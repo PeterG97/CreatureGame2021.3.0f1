@@ -18,4 +18,4 @@ Google Drive link for latest Windows build:
 
 Zipped: https://drive.google.com/file/d/1eoYmm5jvw0Lp62EvQ_p5o9DKpJnYeEY7/view?usp=sharing
 
-Unzipped: https://drive.google.com/drive/folders/1qXNqF7Bz5Bq2bL_Cfj-G1pP_ZhYA2R5L?usp=sharing
+Unzipped: https://drive.google.com/drive/folders/1xvV8XY54yErVnITdfJ_pQy-j0hVhixgV?usp=sharing
