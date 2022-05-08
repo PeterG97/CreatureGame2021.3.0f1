@@ -16,6 +16,6 @@ Assets / Lifeforms / Animals / Scripts / Animal.cs
 
 Google Drive link for latest Windows build:
 
-Zipped: https://drive.google.com/file/d/1eoYmm5jvw0Lp62EvQ_p5o9DKpJnYeEY7/view?usp=sharing
+Zipped: https://drive.google.com/file/d/1TVeEt8U0b0Xt01Pv0As324PdVDBDppYF/view?usp=sharing
 
-Unzipped: https://drive.google.com/drive/folders/1qXNqF7Bz5Bq2bL_Cfj-G1pP_ZhYA2R5L?usp=sharing
+Unzipped: https://drive.google.com/drive/folders/1yw-4_x4HSUeR9GpeOmKKQ3H98E1xNkgv?usp=sharing
