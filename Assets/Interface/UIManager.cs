@@ -71,9 +71,8 @@ public class UIManager : MonoSingleton<UIManager>
     {
         camera = Camera.main;
 
-        SetUpUI();
+        UpdateUIReferences();
         UpdateAllUI();
-        Invoke("DelayedMeasurements", 0.01f);
     }
 
     private void Update()
@@ -144,7 +143,7 @@ public class UIManager : MonoSingleton<UIManager>
                 {
                     //With just isOverUI it was possible to disable the animalInfo window when over UI but the animalInfo itself is UI
                     //so if near the end of the screen it would flash on and off
-                    if (!animalInfoMenuTransform.gameObject.activeSelf && isOverUI) //If not yet enabled and currently over UI do not enable
+                    if (animalInfoMenuTransform == null || (!animalInfoMenuTransform.gameObject.activeSelf && isOverUI)) //If not yet enabled and currently over UI do not enable
                         break;
 
                     DisplayAnimalInfo(animal, mousePosition);
@@ -239,6 +238,12 @@ public class UIManager : MonoSingleton<UIManager>
 
 
     #region ---=== Setup ===---
+    public void UpdateUIReferences()
+    {
+        SetUpUI();
+        Invoke("DelayedMeasurements", 0.1f);
+    }
+
     private void SetUpUI()
     {
         if (!CheckNull.SingleInstanceNotNull(ref UICanvas, false))

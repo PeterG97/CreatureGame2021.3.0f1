@@ -48,3 +48,5 @@ MonoBehaviour:
   cellWidth: 32
   cellHeight: 18
   wallDistance: 5
+  animalSpawnPercent: 15
+  plantSpawnPercent: 70
