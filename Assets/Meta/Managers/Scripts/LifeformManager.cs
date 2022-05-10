@@ -285,7 +285,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         _animal.maxNutrition = LifeformValues.AnimalsBaseMaxNutrition * Mathf.Pow(_animal.size, LifeformValues.NutritionPower);
 
         //Body
-        _animal.transform.localScale = new Vector3(_animal.size, _animal.size, _animal.transform.localScale.z);
+        _animal.UpdateSize();
         _animal.transform.position = new Vector3(_animal.transform.position.x, _animal.transform.position.y, -(_animal.transform.localScale.y - 1) / 2);
         SetAnimalBody(_animal, _animal.bodyIndex, _animal.color);
         SetAnimalEye(_animal, _animal.eyeIndex);
@@ -315,10 +315,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         //Set child stats
         if (!_animal.adult)
-        {
             AnimalMultiplyAgeStats(_animal, LifeformValues.AnimalChildStatMult);
-            _animal.ResizeChild();
-        }
 
         //Calculated after baby check because it changes maxNutrition
         _animal.Nutrition = UnityEngine.Random.Range(_animal.maxNutrition * LifeformValues.AnimalStartingNutritionMin,

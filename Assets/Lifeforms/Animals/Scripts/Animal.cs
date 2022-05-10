@@ -78,6 +78,8 @@ public class Animal : SimulatedLifeform
 
     //Constant values
     [NonSerialized] private float interactDistance;
+    [NonSerialized] private float slimeSizeMin;
+    [NonSerialized] private float slimeSizeMax;
 
     //Time values to reset timers to
     [Header("Timers")]
@@ -183,6 +185,8 @@ public class Animal : SimulatedLifeform
         detectionTimer = UnityEngine.Random.Range(0, 1f); //Makes sure many new spawns don't all check their detection collision at the same time
         Action = AnimalAction.Idle; //Default and resets the timeOutTimer
         slimeParticles = tform.GetComponentInChildren<ParticleSystem>().main;
+        slimeSizeMin = slimeParticles.startSize.constantMin;
+        slimeSizeMax = slimeParticles.startSize.constantMax;
     }
 
     void Start()
@@ -222,7 +226,8 @@ public class Animal : SimulatedLifeform
             {
                 if (resizeTimer <= 0)
                 {
-                    ResizeChild();
+                    resizeTimer = resizeTimerMax;
+                    UpdateSize();
                 }
             }
 
@@ -232,7 +237,8 @@ public class Animal : SimulatedLifeform
         {
             if (resizeTimer <= 0)
             {
-                ResizeCorpse();
+                resizeTimer = resizeTimerMax;
+                UpdateSize();
             }
         }
     }
@@ -400,7 +406,10 @@ public class Animal : SimulatedLifeform
     private Vector2 MoveTowardsPosition(Vector2 _targetPos)
     {
         Vector2 direction = (_targetPos - rigidBody.position).normalized;
-        rigidBody.velocity = moveSpeed * Time.deltaTime * direction;
+
+        //If less than 1/4 of their interactDistance then don't move
+        if (Vector2.Distance(rigidBody.position, _targetPos) > interactDistance * 0.25f)
+            rigidBody.velocity = moveSpeed * Time.deltaTime * direction;
 
         return direction; //Used for interaction
     }
@@ -739,7 +748,7 @@ public class Animal : SimulatedLifeform
             {
                 Nutrition += wantedNutrition * nutritionMult;
                 animal.DecomposeTimer -= wantedNutrition;
-                animal.ResizeCorpse();
+                animal.UpdateSize();
             }
             else //Take all
             {
@@ -871,28 +880,39 @@ public class Animal : SimulatedLifeform
         LifeformManager.Instance.AnimalMultiplyAgeStats(this, 1 / LifeformValues.AnimalChildStatMult);
     }
 
-    public void ResizeChild()
+    public void UpdateSize()
     {
-        resizeTimer = resizeTimerMax;
+        if (!dead)
+        {
+            if (adult)
+                CalcResize(1f);
+            else
+            {
+                float newSize = 0.5f / (adultAge / maxAge) * (Age / maxAge) + 0.5f;
+                CalcResize(newSize);
 
-        float newSize = 0.5f/(adultAge / maxAge) * (Age / maxAge) + 0.5f;
-        tform.localScale = new Vector3(size * newSize, size * newSize, tform.localScale.z);
+                //Fixes YZ depth sorting for scaled objects
+                tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1) / 2);
+            }
+        }
+        else
+        {
+            float remainingSize = decomposeTimer / maxNutrition;
+            if (remainingSize < 0.15f)
+                remainingSize = 0.15f;
+            CalcResize(remainingSize);
 
-        //Fixes YZ depth sorting for scaled objects
-        tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1) / 2);
+            //Fixes YZ depth sorting for scaled objects
+            tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1) / 2);
+        }
     }
 
-    public void ResizeCorpse()
+    private void CalcResize(float _mult)
     {
-        resizeTimer = resizeTimerMax;
+        tform.localScale = new Vector3(size * _mult, size * _mult, tform.localScale.z);
 
-        float remainingSize = decomposeTimer / maxNutrition;
-        if (remainingSize < 0.15f)
-            remainingSize = 0.15f;
-        tform.localScale = new Vector3(size * remainingSize, size * remainingSize, tform.localScale.z);
-
-        //Fixes YZ depth sorting for scaled objects
-        tform.position = new Vector3(tform.position.x, tform.position.y, -(tform.localScale.y - 1) / 2);
+        if (!dead)
+            slimeParticles.startSize = new ParticleSystem.MinMaxCurve(slimeSizeMin * tform.localScale.x, slimeSizeMax * tform.localScale.y);
     }
 
     public void AfterReproduce(float _nutritionLost, float _deathAgeLost)

@@ -9,12 +9,12 @@
 #region ---=== TODO ===---
 /* Plant abilities
  * Adjust depth sorting for outline (either add basic offset to help a little or track line width in script)
- * Plant wind shader stutter
+ * Plant wind shader stutter (make a new reactive shader instead of fixing it)
  * Add more descriptions
  * Replace FindObjectsOfType with FindObjectsWithTag performs way better
  * Implement StringBuilder performs better
- * Foreach for for loops that access index of array more than once
- * Order more complex data types after others (vector * float is worse than float * vector) same is true for int and float
+ * Foreach for loops that access index of array more than once
+ * Try to move some of the animal specific logic to the animal class
  * 
  * Feature creep:
  * Add attack animation between fighting animals for clarity
