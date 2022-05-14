@@ -5317,6 +5317,7 @@ GameObject:
   - component: {fileID: 1579436388147658239}
   - component: {fileID: 291859078532128182}
   - component: {fileID: 9184867350736523189}
+  - component: {fileID: 3386832141866239240}
   m_Layer: 6
   m_Name: Velocity Emitter
   m_TagString: Untagged
@@ -5332,7 +5333,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7364033778572825557}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.25, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5380,8 +5381,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: 4adeaf2d2b1c7417e89f026626d8264f, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: 3286163911610860551, guid: 6e45369e0fa2c48428f88bfca74ccee3, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -5432,6 +5433,17 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!210 &3386832141866239240
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7364033778572825557}
+  m_Enabled: 1
+  m_SortingLayerID: 64936141
+  m_SortingLayer: -1
+  m_SortingOrder: -5
 --- !u!1 &9155518744707923940
 GameObject:
   m_ObjectHideFlags: 0

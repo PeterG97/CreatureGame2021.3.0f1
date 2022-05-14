@@ -71,6 +71,12 @@ public class LifeformValues : ScriptableObject
     [Tooltip("Maximum animal scale (Default 2)")]
     [SerializeField] private float animalMaxSize = 3f;
     public float AnimalMaxSize { get => animalMaxSize; set => animalMaxSize = value; }
+    [Tooltip("Max random X offset as % of cellsize in negative and positive directions (Default 0.3)")]
+    [SerializeField] private float plantPosOffsetX = 0.3f;
+    public float PlantPosOffsetX { get => plantPosOffsetX; set => plantPosOffsetX = value; }
+    [Tooltip("Max random Y offset as % of cellsize in negative and positive directions (Default 0.4)")]
+    [SerializeField] private float plantPosOffsetY = 0.4f;
+    public float PlantPosOffsetY { get => plantPosOffsetY; set => plantPosOffsetY = value; }
 
 
     [Header("HP")]
@@ -84,7 +90,7 @@ public class LifeformValues : ScriptableObject
 
 
     [Header("Movespeed")]
-    [SerializeField] private float animalsBaseMoveSpeed = 40f;
+    [SerializeField] private float animalsBaseMoveSpeed = 30f;
     public float AnimalsBaseMoveSpeed { get => animalsBaseMoveSpeed; set => animalsBaseMoveSpeed = value; }
     [Tooltip("Power to inversely scale move speed based on body size (Default -1)")]
     [SerializeField] private float moveSpeedPower = -1f;
@@ -211,25 +217,25 @@ public class LifeformValues : ScriptableObject
     [Tooltip("Chance that reproduction type will be changed to the opposite type (0.02)")]
     [SerializeField] private float reproductionTypeVariation = 0.02f;
     public float ReproductionTypeVariation { get => reproductionTypeVariation; set => reproductionTypeVariation = value; }
-    [Tooltip("Nutrition percent of total lost by each parent when a baby is made (0.2)")]
-    [SerializeField] private float sexualNutritionLost = 0.2f;
+    [Tooltip("Nutrition percent of total lost by each parent when a baby is made (0.1)")]
+    [SerializeField] private float sexualNutritionLost = 0.1f;
     public float SexualNutritionLost { get => sexualNutritionLost; set => sexualNutritionLost = value; }
-    [Tooltip("Nutrition percent of total lost by the parent when a baby is made (0.6)")]
-    [SerializeField] private float asexualNutritionLost = 0.6f;
+    [Tooltip("Nutrition percent of total lost by the parent when a baby is made (0.5)")]
+    [SerializeField] private float asexualNutritionLost = 0.5f;
     public float AsexualNutritionLost { get => asexualNutritionLost; set => asexualNutritionLost = value; }
-    [Tooltip("The age which a sexual animal will die is reduced by a percentage of the maxAge (0.2)")]
-    [SerializeField] private float sexualDeathAgeLost = 0.2f;
+    [Tooltip("The age which a sexual animal will die is reduced by a percentage of the maxAge (0.1)")]
+    [SerializeField] private float sexualDeathAgeLost = 0.1f;
     public float SexualDeathAgeLost { get => sexualDeathAgeLost; set => sexualDeathAgeLost = value; }
-    [Tooltip("The age which an asexual animal will die is reduced by a percentage of the maxAge (0.4)")]
-    [SerializeField] private float asexualDeathAgeLost = 0.4f;
+    [Tooltip("The age which an asexual animal will die is reduced by a percentage of the maxAge (0.3)")]
+    [SerializeField] private float asexualDeathAgeLost = 0.3f;
     public float AsexualDeathAgeLost { get => asexualDeathAgeLost; set => asexualDeathAgeLost = value; }
-    [Tooltip("The base amount of a lifeform's age that must pass before they can reporduce again (0.05)")]
-    [SerializeField] private float animalReproductionTimePercent = 0.1f;
+    [Tooltip("The base amount of a lifeform's age that must pass before they can reporduce again (0.03)")]
+    [SerializeField] private float animalReproductionTimePercent = 0.03f;
     public float AnimalReproductionTimePercent { get => animalReproductionTimePercent; set => animalReproductionTimePercent = value; }
     [Tooltip("The min drawbacks to reproduction [Time to reproduce, nutrition loss, deathAge loss] (0.75)")]
     [SerializeField] private float animalReproductionNegativesMin = 0.5f;
     public float AnimalReproductionNegativesMin { get => animalReproductionNegativesMin; set => animalReproductionNegativesMin = value; }
-    [Tooltip("The min drawbacks to reproduction [Time to reproduce, nutrition loss, deathAge loss] (0.75)")]
+    [Tooltip("The max drawbacks to reproduction [Time to reproduce, nutrition loss, deathAge loss] (1.5)")]
     [SerializeField] private float animalReproductionNegativesMax = 1.5f;
     public float AnimalReproductionNegativesMax { get => animalReproductionNegativesMax; set => animalReproductionNegativesMax = value; }
     #endregion

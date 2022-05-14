@@ -519,9 +519,9 @@ public class Animal : SimulatedLifeform
             return false;
 
         //Reasons to attack
-        //1 - Violent and adult
+        //1 - Violent and adult and not related
         //2 - Protective and the animal is violent or the animal is targeting a relative
-        if (nature == AnimalNature.Violent && adult
+        if (nature == AnimalNature.Violent && adult && !IsRelated(targetAnimal)
            || (social == AnimalSocial.Protective && (targetAnimal.nature == AnimalNature.Violent || (targetAnimal.target != null && targetAnimal.target.animal && IsRelated(targetAnimal.target.animal)))))
         {
             if (Action == AnimalAction.Idle || Action == AnimalAction.Follow) //Unimportant actions
@@ -693,28 +693,27 @@ public class Animal : SimulatedLifeform
     
 
     #region ---=== Direct Interactions With Other Lifeform ===---
-    private void HitAnimal(Animal _animal)
+    private void HitAnimal(Animal _targAnimal)
     {
-        //TODO Remove
-        if (_animal == this)
-            print("ERROR - HIT SELF");
-
         actionTimer = actionTimerMax;
 
-        GameManager.Instance.PlayAnimalHitParticle(_animal.transform.position, _animal.transform.localScale.x);
+        //Hit particle inbetween the two animals
+        GameManager.Instance.PlayAnimalHitParticle(Vector2.Lerp(transform.position, _targAnimal.transform.position, 0.5f), transform.localScale.x);
+        //Bleed particle on the hit animal
+        GameManager.Instance.PlayAnimalBleedParticle(_targAnimal.transform.position, _targAnimal.transform.localScale.x);
 
-        _animal.deathAge -= attackPower;
-        _animal.HitPoints -= attackPower;
+        _targAnimal.deathAge -= attackPower;
+        _targAnimal.HitPoints -= attackPower;
     }
 
-    private void EatFood(LifeformObject _lifeform)
+    private void EatFood(LifeformObject _targLifeform)
     {
         //Reset variables
         actionTimer = actionTimerMax;
         Action = AnimalAction.Idle;
 
-        Plant plant = _lifeform.plant;
-        Animal animal = _lifeform.animal;
+        Plant plant = _targLifeform.plant;
+        Animal animal = _targLifeform.animal;
 
         //Only plant and animal (only corpses) right now
         if (plant != null)
@@ -730,7 +729,7 @@ public class Animal : SimulatedLifeform
             {
                 Nutrition += wantedNutrition * nutritionMult;
                 plant.Nutrition -= wantedNutrition;
-                plant.Resize();
+                plant.UpdateSize();
             }
             else //Take all
             {
@@ -740,7 +739,7 @@ public class Animal : SimulatedLifeform
         }
         else if (animal != null)
         {
-            GameManager.Instance.PlayAnimalHitParticle(animal.transform.position, animal.transform.localScale.x);
+            GameManager.Instance.PlayAnimalBleedParticle(animal.transform.position, animal.transform.localScale.x);
 
             float nutritionMult = LifeformManager.Instance.CalcColorSimilarity(color, animal.color);
             float wantedNutrition = (maxNutrition - nutrition) / nutritionMult;
@@ -931,6 +930,12 @@ public class Animal : SimulatedLifeform
         Action = AnimalAction.Idle;
     }
 
+    public void SetStun(float _time)
+    {
+        stunTimer = _time;
+        stunEffectTimer = 0;
+    }
+
     //Accessors for editor buttons
     public void Randomize()
     {
@@ -946,12 +951,6 @@ public class Animal : SimulatedLifeform
             return;
         
         LifeformManager.Instance.UpdateLifeform(this);
-    }
-
-    public void SetStun(float _time)
-    {
-        stunTimer = _time;
-        stunEffectTimer = 0;
     }
     #endregion
 }

@@ -13,7 +13,7 @@ public class SinglePlantSpawner : MonoBehaviour
             myPlant = LifeformManager.Instance.SpawnNewPlant(transform.position);
             myPlant.Randomize();
             myPlant.Nutrition = myPlant.maxNutrition * 0.75f;
-            myPlant.Resize();
+            myPlant.UpdateSize();
         }
     }
 }

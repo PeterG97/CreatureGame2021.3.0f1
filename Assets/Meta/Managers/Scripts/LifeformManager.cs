@@ -42,10 +42,12 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     [NonSerialized] private GameObject plantSceneParent;
     [NonSerialized] private GameObject animalSceneParent;
 
+    //Constant from runtime
+    [NonSerialized] private float cellSize;
+
     //Population tracker for performance menu
     [NonSerialized] private int plantPopulation;
     [NonSerialized] private int animalPopulation;
-
 
     [NonSerialized] public float plantSpawnTime = 1f;
     [NonSerialized] public float animalSpawnTime = 1f;
@@ -95,6 +97,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     {
         base.Awake();
 
+        cellSize = GameManager.Instance.GameValues.GameCellSize;
+
         plantSpawnTime = LifeformValues.PlantSpawnTime;
         animalSpawnTime = LifeformValues.AnimalSpawnTime;
     }
@@ -135,33 +139,41 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     #region ---=== General Use Methods ===---
     public Plant SpawnNewPlant(Vector2 _pos)
     {
-        GameObject newPlant = Instantiate(plantPrefab, new Vector3(_pos.x, _pos.y,
-                                          transform.position.z), Quaternion.identity);
+        //Game Object
+        GameObject newPlant = Instantiate(plantPrefab,
+                                          new Vector3(_pos.x + cellSize * UnityEngine.Random.Range(-LifeformValues.PlantPosOffsetX, LifeformValues.PlantPosOffsetX),
+                                                      _pos.y + cellSize * UnityEngine.Random.Range(0, LifeformValues.PlantPosOffsetY),
+                                                      transform.position.z),
+                                          Quaternion.identity);
         PlantPopulation++;
-
         newPlant.name = string.Concat("Plant_", newPlant.gameObject.GetInstanceID().ToString().Substring(1));
         
         if (CheckNull.SingleObjectNotNull(ref plantSceneParent, "Plants", true))
             newPlant.transform.SetParent(plantSceneParent.transform);
 
+        //Grid Adjustment
         if (MapManager.Instance != null)
             MapManager.Instance.generalGrid.SetValue(new Vector2(_pos.x, _pos.y), newPlant.GetInstanceID());
 
-        return newPlant.GetComponent<Plant>();
+        //Plant Script
+        Plant plant = newPlant.GetComponent<Plant>();
+        return plant;
     }
 
     public Animal SpawnNewAnimal(Vector2 _pos)
     {
+        //Game Object
         GameObject newAnimal = Instantiate(animalPrefab, new Vector3(_pos.x, _pos.y,
                                            transform.position.z), Quaternion.identity);
         AnimalPopulation++;
-
         newAnimal.name = string.Concat("Animal_", newAnimal.gameObject.GetInstanceID().ToString().Substring(1));
         
         if (CheckNull.SingleObjectNotNull(ref animalSceneParent, "Animals", true))
             newAnimal.transform.SetParent(animalSceneParent.transform);
 
-        return newAnimal.GetComponent<Animal>();
+        //Animal Script
+        Animal animal = newAnimal.GetComponent<Animal>();
+        return animal;
     }
 
 
@@ -266,7 +278,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         */
 
         _plant.reproductionTimer = 1f;
-        _plant.Resize();
+        _plant.UpdateSize();
     }
 
     public void UpdateLifeform(Animal _animal)
@@ -599,7 +611,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         //Update Baby
         UpdateLifeform(_baby);
         _baby.Nutrition = _baby.maxNutrition * LifeformValues.BabyPlantStartingNutrition;
-        _baby.Resize();
+        _baby.UpdateSize();
 
         //Update Parents
         _plant.AfterReproduce(LifeformValues.PlantReproductionDeathAgeLost);

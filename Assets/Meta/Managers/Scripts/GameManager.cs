@@ -8,9 +8,7 @@
 
 #region ---=== TODO ===---
 /* ---Main TODO---
- * Plant abilities
  * Fix plant shader jitter
- * Try to move some of the animal specific logic to the animal class
  * 
  * ---Performance---
  * Replace FindObjectsOfType with FindObjectsWithTag performs way better
@@ -19,7 +17,6 @@
  * Improve physics performance
  * 
  * ---Feature creep---
- * Add attack animation between fighting animals for clarity
  * Tile map grass, sand, water
  * Research best practice universal input system
  * UI Overhaul (Maybe new ui system)
@@ -50,7 +47,14 @@ public class GameManager : PermanentMonoSingleton<GameManager>
     //Particles
     [NonSerialized] public ParticleSystem stunParticleSystem;
     [NonSerialized] public ParticleSystem plantHitParticleSystem;
+    [NonSerialized] public ParticleSystem animalBleedParticleSystem;
+    [NonSerialized] public ParticleSystem.MainModule animalBleedParticleMain;
+    [NonSerialized] public ParticleSystem.MinMaxCurve animalBleedParticleMainSize;
+    [NonSerialized] public ParticleSystem.ShapeModule animalBleedParticleShape;
+    [NonSerialized] public Vector3 animalBleedParticleShapeScale;
     [NonSerialized] public ParticleSystem animalHitParticleSystem;
+    [NonSerialized] public ParticleSystem.MainModule animalHitParticleMain;
+    [NonSerialized] public ParticleSystem.MinMaxCurve animalHitParticleMainSize;
     [NonSerialized] public ParticleSystem animalDeathParticleSystem;
     [NonSerialized] public ParticleSystem animalGrowUpParticleSystem;
     [NonSerialized] public ParticleSystem animalReproduceParticleSystem;
@@ -76,8 +80,6 @@ public class GameManager : PermanentMonoSingleton<GameManager>
     protected override void Awake()
     {
         base.Awake();
-
-        LoadMainParticleSystems();
     }
 
     private void Start()
@@ -117,14 +119,28 @@ public class GameManager : PermanentMonoSingleton<GameManager>
 
         stunParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/StunParticleSystem")).GetComponent<ParticleSystem>();
         stunParticleSystem.transform.parent = parent.transform;
+
         plantHitParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/PlantHitParticleSystem")).GetComponent<ParticleSystem>();
         plantHitParticleSystem.transform.parent = parent.transform;
+
+        animalBleedParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/AnimalBleedParticleSystem")).GetComponent<ParticleSystem>();
+        animalBleedParticleSystem.transform.parent = parent.transform;
+        animalBleedParticleMain = animalBleedParticleSystem.main;
+        animalBleedParticleMainSize = animalBleedParticleMain.startSize;
+        animalBleedParticleShape = animalBleedParticleSystem.shape;
+        animalBleedParticleShapeScale = animalBleedParticleShape.scale;
+
         animalHitParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/AnimalHitParticleSystem")).GetComponent<ParticleSystem>();
         animalHitParticleSystem.transform.parent = parent.transform;
+        animalHitParticleMain = animalHitParticleSystem.main;
+        animalHitParticleMainSize = animalHitParticleMain.startSize;
+
         animalDeathParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/AnimalDeathParticleSystem")).GetComponent<ParticleSystem>();
         animalDeathParticleSystem.transform.parent = parent.transform;
+
         animalGrowUpParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/AnimalGrowUpParticleSystem")).GetComponent<ParticleSystem>();
         animalGrowUpParticleSystem.transform.parent = parent.transform;
+
         animalReproduceParticleSystem = Instantiate(Resources.Load<GameObject>("Particles/AnimalReproduceParticleSystem")).GetComponent<ParticleSystem>();
         animalReproduceParticleSystem.transform.parent = parent.transform;
     }
@@ -147,11 +163,23 @@ public class GameManager : PermanentMonoSingleton<GameManager>
         }
     }
 
+    public void PlayAnimalBleedParticle(Vector2 _loction, float _scale)
+    {
+        if (animalBleedParticleSystem != null)
+        {
+            animalBleedParticleSystem.transform.position = _loction;
+            animalBleedParticleMain.startSize = new ParticleSystem.MinMaxCurve(animalBleedParticleMainSize.constantMax * _scale);
+            animalBleedParticleShape.scale = _scale * _scale *  animalBleedParticleShapeScale;
+            animalBleedParticleSystem.Play();
+        }
+    }
+
     public void PlayAnimalHitParticle(Vector2 _loction, float _scale)
     {
         if (animalHitParticleSystem != null)
         {
             animalHitParticleSystem.transform.position = _loction;
+            animalHitParticleMain.startSize = new ParticleSystem.MinMaxCurve(animalHitParticleMainSize.constantMax * _scale);
             animalHitParticleSystem.Play();
         }
     }

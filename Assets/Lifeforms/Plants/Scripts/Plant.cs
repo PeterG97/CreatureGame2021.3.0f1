@@ -66,7 +66,7 @@ public class Plant : SimulatedLifeform
         growthUpdateTimer -= Time.deltaTime;
         if (growthUpdateTimer <= 0)
         {
-            Resize();
+            UpdateSize();
         }
 
         reproductionTimer -= Time.deltaTime;
@@ -89,7 +89,7 @@ public class Plant : SimulatedLifeform
         }
     }
 
-    public void Resize()
+    public void UpdateSize()
     {
         growthUpdateTimer = growthUpdateTimerMax;
 
@@ -123,7 +123,7 @@ public class Plant : SimulatedLifeform
             return;
 
         dead = true;
-        Resize();
+        UpdateSize();
 
         if (LifeformManager.Instance != null)
             LifeformManager.Instance.PlantPopulation--;

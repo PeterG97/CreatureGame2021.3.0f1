@@ -36,6 +36,9 @@ public static class CheckNull
 
     public static bool SingleObjectNotNull(ref GameObject _argument, string _objName, bool _spawnIfNull)
     {
+        //Checks if game object is null
+        //if not do nothing
+        //if null then try to find if an object of the given name exists or create a new one and give it the correct parents
         if (_argument == null)
         {
             _argument = GameObject.Find(_objName);

@@ -4,6 +4,7 @@
  * 
  * Dependent on no classes */
 
+using System;
 using UnityEngine;
 
 public class SimulatedLifeform : Lifeform
@@ -23,7 +24,7 @@ public class SimulatedLifeform : Lifeform
     #endregion
 
     #region ---=== Nonserialized Variables ===---
-
+    
     #endregion
 
     #region ---=== Get/Set Variables ===---
