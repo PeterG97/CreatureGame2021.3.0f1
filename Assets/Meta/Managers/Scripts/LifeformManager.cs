@@ -46,12 +46,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     [NonSerialized] private int plantPopulation;
     [NonSerialized] private int animalPopulation;
 
-    //Options Menu
-    [NonSerialized] public bool spawnNewPlantByTimer = false; //Assumed false based on options UI
-    [NonSerialized] public float plantSpawnTimeMax = 20f;
+
     [NonSerialized] public float plantSpawnTime = 1f;
-    [NonSerialized] public bool spawnNewAnimalByTimer = false; //Assumed false based on options UI
-    [NonSerialized] public float animalSpawnTimeMax = 60f;
     [NonSerialized] public float animalSpawnTime = 1f;
     [NonSerialized] public float spawnNewTimeVariation = 0.1f;
     #endregion
@@ -99,8 +95,8 @@ public class LifeformManager : MonoSingleton<LifeformManager>
     {
         base.Awake();
 
-        plantSpawnTime = plantSpawnTimeMax;
-        animalSpawnTime = animalSpawnTimeMax;
+        plantSpawnTime = LifeformValues.PlantSpawnTime;
+        animalSpawnTime = LifeformValues.AnimalSpawnTime;
     }
 
     private void FixedUpdate()
@@ -108,27 +104,27 @@ public class LifeformManager : MonoSingleton<LifeformManager>
 
         if (MapManager.Instance != null)
         {
-            if (spawnNewPlantByTimer)
+            if (LifeformValues.SpawnNewPlantByTimer)
             {
                 plantSpawnTime -= Time.deltaTime;
 
                 if (plantSpawnTime <= 0)
                 {
                     MapManager.Instance.SpawnLifeRandomCell(true);
-                    plantSpawnTime = UnityEngine.Random.Range(plantSpawnTimeMax - (plantSpawnTimeMax * spawnNewTimeVariation),
-                                                              plantSpawnTimeMax + (plantSpawnTimeMax * spawnNewTimeVariation));
+                    plantSpawnTime = UnityEngine.Random.Range(LifeformValues.PlantSpawnTime - (LifeformValues.PlantSpawnTime * spawnNewTimeVariation),
+                                                              LifeformValues.PlantSpawnTime + (LifeformValues.PlantSpawnTime * spawnNewTimeVariation));
                 }
             }
 
-            if (spawnNewAnimalByTimer)
+            if (LifeformValues.SpawnNewAnimalByTimer)
             {
                 animalSpawnTime -= Time.deltaTime;
 
                 if (animalSpawnTime <= 0)
                 {
                     MapManager.Instance.SpawnLifeRandomCell(false);
-                    animalSpawnTime = UnityEngine.Random.Range(animalSpawnTimeMax - (animalSpawnTimeMax * spawnNewTimeVariation),
-                                                               animalSpawnTimeMax + (animalSpawnTimeMax * spawnNewTimeVariation));
+                    animalSpawnTime = UnityEngine.Random.Range(LifeformValues.AnimalSpawnTime - (LifeformValues.AnimalSpawnTime * spawnNewTimeVariation),
+                                                               LifeformValues.AnimalSpawnTime + (LifeformValues.AnimalSpawnTime * spawnNewTimeVariation));
                 }
             }
         }
@@ -290,7 +286,7 @@ public class LifeformManager : MonoSingleton<LifeformManager>
         SetAnimalBody(_animal, _animal.bodyIndex, _animal.color);
         SetAnimalEye(_animal, _animal.eyeIndex);
         SetAnimalMouth(_animal, _animal.mouthIndex);
-        _animal.slimeParticles.startColor = _animal.color;
+        _animal.slimeParticlesSystem.startColor = _animal.color;
 
         //Derived Stats
         _animal.maxHitPoints = Mathf.CeilToInt(LifeformValues.AnimalsBaseHP * Mathf.Pow(_animal.size, LifeformValues.HpPower));

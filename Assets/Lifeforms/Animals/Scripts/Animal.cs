@@ -71,7 +71,8 @@ public class Animal : SimulatedLifeform
     //Own Components
     [NonSerialized] public Rigidbody2D rigidBody;
     [NonSerialized] public Collider2D sightCollider;
-    [NonSerialized] public ParticleSystem.MainModule slimeParticles;
+    [NonSerialized] public Transform slimeParticlesTform;
+    [NonSerialized] public ParticleSystem.MainModule slimeParticlesSystem;
     [NonSerialized] private Material bodyMaterial;
     [NonSerialized] private Transform tform;
     [NonSerialized] public Transform sprites;
@@ -184,9 +185,11 @@ public class Animal : SimulatedLifeform
 
         detectionTimer = UnityEngine.Random.Range(0, 1f); //Makes sure many new spawns don't all check their detection collision at the same time
         Action = AnimalAction.Idle; //Default and resets the timeOutTimer
-        slimeParticles = tform.GetComponentInChildren<ParticleSystem>().main;
-        slimeSizeMin = slimeParticles.startSize.constantMin;
-        slimeSizeMax = slimeParticles.startSize.constantMax;
+
+        //Get main of particle system and transform and store in variables
+        ParticleSystem slimeSystem = tform.GetComponentInChildren<ParticleSystem>();
+        slimeParticlesSystem = slimeSystem.main;
+        slimeParticlesTform = slimeSystem.transform;
     }
 
     void Start()
@@ -861,7 +864,7 @@ public class Animal : SimulatedLifeform
 
         //Turn off effects and collider
         sightCollider.enabled = false;
-        slimeParticles.loop = false;
+        slimeParticlesSystem.loop = false;
         bodyMaterial.SetFloat("_WarpStrength", 0);
 
         //Update Sprite
@@ -912,7 +915,7 @@ public class Animal : SimulatedLifeform
         tform.localScale = new Vector3(size * _mult, size * _mult, tform.localScale.z);
 
         if (!dead)
-            slimeParticles.startSize = new ParticleSystem.MinMaxCurve(slimeSizeMin * tform.localScale.x, slimeSizeMax * tform.localScale.y);
+            slimeParticlesTform.localScale = tform.localScale;
     }
 
     public void AfterReproduce(float _nutritionLost, float _deathAgeLost)

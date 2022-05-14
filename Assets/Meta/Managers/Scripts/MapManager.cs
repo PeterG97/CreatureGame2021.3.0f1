@@ -99,7 +99,7 @@ public class MapManager : MonoSingleton<MapManager>
         mapHeight = cellHeight * gameCellSize;
 
         if (CameraManager.Instance != null)
-            CameraManager.Instance.UpdateCameraSize(mapWidth, mapHeight);
+            CameraManager.Instance.CamUpdateSize(mapWidth, mapHeight);
 
         UIManager.Instance.UpdateGridUI();
 

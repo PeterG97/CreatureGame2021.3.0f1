@@ -5,7 +5,21 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Lifeform Values", menuName = "Global Values/Lifeform Values")]
 public class LifeformValues : ScriptableObject
 {
-    #region ---=== ===---
+    #region ---=== Variables ===---
+    [Header("Timer")]
+    [Tooltip("If the simulation should start with plants spawning automatically (Default true)")]
+    [SerializeField] private bool spawnNewPlantByTimer = true;
+    public bool SpawnNewPlantByTimer { get => spawnNewPlantByTimer; set => spawnNewPlantByTimer = value; }
+    [Tooltip("Time to spawn new random plant (Default 10)")]
+    [SerializeField] private float plantSpawnTime = 10f;
+    public float PlantSpawnTime { get => plantSpawnTime; set => plantSpawnTime = value; }
+    [Tooltip("If the simulation should start with animals spawning automatically (Default true)")]
+    [SerializeField] private bool spawnNewAnimalByTimer = true;
+    public bool SpawnNewAnimalByTimer { get => spawnNewAnimalByTimer; set => spawnNewAnimalByTimer = value; }
+    [Tooltip("Time to spawn new random plant (Default 60)")]
+    [SerializeField] private float animalSpawnTime = 60f;
+    public float AnimalSpawnTime { get => animalSpawnTime; set => animalSpawnTime = value; }
+
     [Header("Color")]
     [Tooltip("The value in HSV color format [Higher == brighter colors] (Default 0.7)")]
     [SerializeField] private float minColorValue = 0.7f;
@@ -79,11 +93,11 @@ public class LifeformValues : ScriptableObject
 
     [Header("Plant Growth")]
     //Plant nutrition counts up to a max value
-    [Tooltip("Essentially max growth (Default 3000)")]
-    [SerializeField] private float plantBaseMaxNutrition = 3000f; //Min nutrition is 0
+    [Tooltip("Essentially max growth (Default 6000)")]
+    [SerializeField] private float plantBaseMaxNutrition = 6000f; //Min nutrition is 0
     public float PlantBaseMaxNutrition { get => plantBaseMaxNutrition; set => plantBaseMaxNutrition = value; }
-    [Tooltip("Gain of nutrition per fixedUpdate (Default 1)")]
-    [SerializeField] private float plantBaseGrowRate = 1f;
+    [Tooltip("Gain of nutrition per fixedUpdate (Default 2)")]
+    [SerializeField] private float plantBaseGrowRate = 2f;
     public float PlantBaseGrowRate { get => plantBaseGrowRate; set => plantBaseGrowRate = value; }
     [Tooltip("Low end of new plant's nutrition (Default 0.1)")]
     [SerializeField] private float plantStartingNutritionMin = 0.2f;

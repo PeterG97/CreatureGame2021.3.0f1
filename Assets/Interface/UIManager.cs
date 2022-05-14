@@ -170,7 +170,7 @@ public class UIManager : MonoSingleton<UIManager>
     private void PerformedScrollWheel(InputAction.CallbackContext context)
     {
         if (CameraManager.Instance != null)
-            CameraManager.Instance.CameraScrollWheelZoom(context.action.ReadValue<Vector2>());
+            CameraManager.Instance.CamScrollWheelZoom(context.action.ReadValue<Vector2>());
     }
 
     public void DisplayAnimalInfo(Animal _animal, Vector2 _position)
@@ -257,10 +257,12 @@ public class UIManager : MonoSingleton<UIManager>
 
         Transform AutoSpawn = optionsMenuTransform.Find("AutoSpawn");
         plantTimerToggle = AutoSpawn.Find("PlantToggle").GetComponent<Toggle>();
+        plantTimerToggle.isOn = LifeformManager.Instance.LifeformValues.SpawnNewPlantByTimer;
         plantTimerToggle.onValueChanged.AddListener((Event) => PlantAutoToggleClicked(Event));
         plantTimerInputText = AutoSpawn.Find("PlantInput").GetComponent<TMP_InputField>(); //Assumes only one TextMesh
         plantTimerInputText.onEndEdit.AddListener((Event) => UpdateAutoSpawnData());
         animalTimerToggle = AutoSpawn.Find("AnimalToggle").GetComponent<Toggle>();
+        animalTimerToggle.isOn = LifeformManager.Instance.LifeformValues.SpawnNewAnimalByTimer;
         animalTimerToggle.onValueChanged.AddListener((Event) => AnimalAutoToggleClicked(Event));
         animalTimerInputText = AutoSpawn.Find("AnimalInput").GetComponent<TMP_InputField>();
         animalTimerInputText.onEndEdit.AddListener((Event) => UpdateAutoSpawnData());
@@ -353,9 +355,9 @@ public class UIManager : MonoSingleton<UIManager>
     private void PlantAutoToggleClicked(bool _toggled)
     {
         if (_toggled)
-            LifeformManager.Instance.spawnNewPlantByTimer = true;
+            LifeformManager.Instance.LifeformValues.SpawnNewPlantByTimer = true;
         else
-            LifeformManager.Instance.spawnNewPlantByTimer = false;
+            LifeformManager.Instance.LifeformValues.SpawnNewPlantByTimer = false;
 
         UpdateAutoSpawnData();
     }
@@ -363,9 +365,9 @@ public class UIManager : MonoSingleton<UIManager>
     private void AnimalAutoToggleClicked(bool _toggled)
     {
         if (_toggled)
-            LifeformManager.Instance.spawnNewAnimalByTimer = true;
+            LifeformManager.Instance.LifeformValues.SpawnNewAnimalByTimer = true;
         else
-            LifeformManager.Instance.spawnNewAnimalByTimer = false;
+            LifeformManager.Instance.LifeformValues.SpawnNewAnimalByTimer = false;
 
         UpdateAutoSpawnData();
     }
@@ -422,10 +424,10 @@ public class UIManager : MonoSingleton<UIManager>
     {
         plantTimerInputText.text = Mathf.Clamp(float.Parse(plantTimerInputText.text), 1f, 999f).ToString();
         animalTimerInputText.text = Mathf.Clamp(float.Parse(animalTimerInputText.text), 1f, 999f).ToString();
-        LifeformManager.Instance.plantSpawnTimeMax = float.Parse(plantTimerInputText.text);
-        LifeformManager.Instance.animalSpawnTimeMax = float.Parse(animalTimerInputText.text);
-        LifeformManager.Instance.plantSpawnTime = LifeformManager.Instance.plantSpawnTimeMax;
-        LifeformManager.Instance.animalSpawnTime = LifeformManager.Instance.animalSpawnTimeMax;
+        LifeformManager.Instance.LifeformValues.PlantSpawnTime = float.Parse(plantTimerInputText.text);
+        LifeformManager.Instance.LifeformValues.AnimalSpawnTime = float.Parse(animalTimerInputText.text);
+        LifeformManager.Instance.plantSpawnTime = LifeformManager.Instance.LifeformValues.PlantSpawnTime;
+        LifeformManager.Instance.animalSpawnTime = LifeformManager.Instance.LifeformValues.AnimalSpawnTime;
     }
 
     private void UpdateAllUI()
@@ -440,10 +442,10 @@ public class UIManager : MonoSingleton<UIManager>
     {
         if (plantTimerToggle != null)
         {
-            plantTimerToggle.isOn.Equals(LifeformManager.Instance.spawnNewPlantByTimer);
-            animalTimerToggle.isOn.Equals(LifeformManager.Instance.spawnNewAnimalByTimer);
-            plantTimerInputText.text = string.Concat(LifeformManager.Instance.plantSpawnTimeMax);
-            animalTimerInputText.text = string.Concat(LifeformManager.Instance.animalSpawnTimeMax);
+            plantTimerToggle.isOn.Equals(LifeformManager.Instance.LifeformValues.SpawnNewPlantByTimer);
+            animalTimerToggle.isOn.Equals(LifeformManager.Instance.LifeformValues.SpawnNewAnimalByTimer);
+            plantTimerInputText.text = string.Concat(LifeformManager.Instance.LifeformValues.PlantSpawnTime);
+            animalTimerInputText.text = string.Concat(LifeformManager.Instance.LifeformValues.AnimalSpawnTime);
         }
     }
 

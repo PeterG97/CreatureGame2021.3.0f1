@@ -7,21 +7,28 @@
  * Dependent on no classes */
 
 #region ---=== TODO ===---
-/* Plant abilities
- * Adjust depth sorting for outline (either add basic offset to help a little or track line width in script)
- * Plant wind shader stutter (make a new reactive shader instead of fixing it)
- * Add more descriptions
+/* ---Main TODO---
+ * Plant abilities
+ * Fix plant shader jitter
+ * Try to move some of the animal specific logic to the animal class
+ * 
+ * ---Performance---
  * Replace FindObjectsOfType with FindObjectsWithTag performs way better
  * Implement StringBuilder performs better
  * Foreach for loops that access index of array more than once
- * Try to move some of the animal specific logic to the animal class
+ * Improve physics performance
  * 
- * Feature creep:
+ * ---Feature creep---
  * Add attack animation between fighting animals for clarity
  * Tile map grass, sand, water
  * Research best practice universal input system
  * UI Overhaul (Maybe new ui system)
- * Implement better age & reproduction timer spawing (some animals spawn near death) */
+ * Add sound
+ * Implement better age & reproduction timer spawing (some animals spawn near death)
+ * 
+ * ---Small Things---
+ * Camera breaks when below min orth size either restrict min grid x & y size or fix it
+ */
 #endregion
 
 using System;
